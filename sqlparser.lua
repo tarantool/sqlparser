@@ -4,9 +4,13 @@ local fio = require("fio")
 local ffi = require("ffi")
 local parserConst = require("parserConst")
 
-local hFile, err = fio.open("LuaDataTypes.h", "O_RDONLY")
+local hFilePath = debug.getinfo(1, "S").source
+hFilePath = fio.dirname(hFilePath:sub(2))
+hFilePath = fio.pathjoin(hFilePath, "LuaDataTypes.h")
+
+local hFile, err = fio.open(hFilePath, "O_RDONLY")
 if hFile == nil then
-    error("Can not open file 'LuaDataTypes.h': " .. tostring(err))
+    error(("Can not open file '%s': %s"):format(hFilePath, tostring(err)))
 end
 
 local ok, cDefs = pcall(hFile.read, hFile)

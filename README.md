@@ -1,11 +1,22 @@
-# luajit-sql-parser
+# Tarantool SQL Parser
 
-An SQL parser for LuaJIT based on [Hyrise](https://github.com/hyrise/sql-parser) parser.
+An SQL parser for LuaJIT. It takes an SQL string as an input and returns an AST.
+The project is based on [Hyrise SQL parser](https://github.com/hyrise/sql-parser). It uses FFI to communicate with it.
 
-Usage:
+## Requirements:
+
+- gcc 4.8+ (or clang 3.4+)
+
+## Installation:
+
+```shell
+tarantoolctl rocks install sqlparser
+```
+
+## Usage:
 
 ```Lua
-local sqlParser = require("sqlParser")
+local sqlParser = require("sqlparser")
 
 local result = sqlParser.parse("select a from test;")
 ```
