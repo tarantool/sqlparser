@@ -36,12 +36,12 @@ LuaLimitDescription* copyLimitDescription(
     const hsql::LimitDescription* limitDesc);
 void freeLimitDescription(LuaLimitDescription* luaLimitDesc);
 
-LuaSelectStatement* copySelectSatement(
+LuaSelectStatement* copySelectStatement(
     const hsql::SelectStatement* statement);
 void freeSelectStatement(LuaSelectStatement* luaStatement);
 
-LuaSQLStatement* copySQLSatement(const hsql::SQLStatement* statement);
-void freeSQLSatement(LuaSQLStatement* luaStatement);
+LuaSQLStatement* copySQLStatement(const hsql::SQLStatement* statement);
+void freeSQLStatement(LuaSQLStatement* luaStatement);
 
 LuaSQLParserResult* copySQLParserResult(hsql::SQLParserResult* result);
 void freeSQLParserResult(LuaSQLParserResult* result);
@@ -119,7 +119,7 @@ LuaExpr* copyExpr(const hsql::Expr* expr)
 
     luaExpr->exprList = copyExprArr(expr->exprList);
 
-    luaExpr->select = 0;
+    luaExpr->select = copySelectStatement(expr->select);
 
     luaExpr->name = copyStr(expr->name);
     luaExpr->table = copyStr(expr->table);
@@ -145,6 +145,8 @@ void freeExpr(LuaExpr* luaExpr)
     freeExpr(luaExpr->expr2);
 
     freeArr<LuaExpr>(luaExpr->exprList, luaExpr->exprListSize, freeExpr);
+
+    freeSelectStatement(luaExpr->select);
 
     freeStr(luaExpr->name);
     freeStr(luaExpr->table);
@@ -237,7 +239,7 @@ LuaTableRef* copyTableRef(const hsql::TableRef* tableRef)
     luaTableRef->name = copyStr(tableRef->name);
     luaTableRef->alias = copyAlias(tableRef->alias);
 
-    luaTableRef->select = 0;
+    luaTableRef->select = copySelectStatement(tableRef->select);
 
     if (tableRef->list != 0)
         luaTableRef->listSize = tableRef->list->size();
@@ -260,6 +262,8 @@ void freeTableRef(LuaTableRef* luaTableRef)
     freeStr(luaTableRef->schema);
     freeStr(luaTableRef->name);
     freeAlias(luaTableRef->alias);
+
+    freeSelectStatement(luaTableRef->select);
 
     freeArr<LuaTableRef>(luaTableRef->list, luaTableRef->listSize,
         freeTableRef);
@@ -313,7 +317,7 @@ LuaSetOperation* copySetOperation(const hsql::SetOperation* setOp)
     luaSetOp->setType = (SetType)setOp->setType;
     luaSetOp->isAll = setOp->isAll;
 
-    luaSetOp->nestedSelectStatement = copySelectSatement(
+    luaSetOp->nestedSelectStatement = copySelectStatement(
         setOp->nestedSelectStatement);
 
     if (setOp->resultOrder != 0)
@@ -379,7 +383,7 @@ LuaWithDescription* copyWithDescription(const hsql::WithDescription* withDesc)
         sizeof(LuaWithDescription));
 
     luaWithDesc->alias = copyStr(withDesc->alias);
-    luaWithDesc->select = 0;
+    luaWithDesc->select = copySelectStatement(withDesc->select);
 
     return luaWithDesc;
 }
@@ -390,6 +394,7 @@ void freeWithDescription(LuaWithDescription* luaWithDesc)
         return;
 
     freeStr(luaWithDesc->alias);
+    freeSelectStatement(luaWithDesc->select);
 
     free(luaWithDesc);
 }
@@ -420,7 +425,7 @@ void freeLimitDescription(LuaLimitDescription* luaLimitDesc)
     free(luaLimitDesc);
 }
 
-void fillSQLSatement(const hsql::SQLStatement* statement,
+void fillSQLStatement(const hsql::SQLStatement* statement,
     LuaSQLStatement* luaStatement)
 {
     luaStatement->type = (StatementType)statement->type();
@@ -435,7 +440,7 @@ void fillSQLSatement(const hsql::SQLStatement* statement,
     luaStatement->hints = copyExprArr(statement->hints);
 }
 
-LuaSelectStatement* copySelectSatement(const hsql::SelectStatement* statement)
+LuaSelectStatement* copySelectStatement(const hsql::SelectStatement* statement)
 {
     if (statement == 0)
         return 0;
@@ -443,7 +448,7 @@ LuaSelectStatement* copySelectSatement(const hsql::SelectStatement* statement)
     LuaSelectStatement* luaStatement = (LuaSelectStatement*)std::malloc(
         sizeof(LuaSelectStatement));
 
-    fillSQLSatement(statement, &luaStatement->base);
+    fillSQLStatement(statement, &luaStatement->base);
 
     luaStatement->fromTable = copyTableRef(statement->fromTable);
 
@@ -517,7 +522,7 @@ void freeSelectStatement(LuaSelectStatement* luaStatement)
     free(luaStatement);
 }
 
-LuaSQLStatement* copySQLSatement(const hsql::SQLStatement* statement)
+LuaSQLStatement* copySQLStatement(const hsql::SQLStatement* statement)
 {
     if (statement == 0)
         return 0;
@@ -528,7 +533,7 @@ LuaSQLStatement* copySQLSatement(const hsql::SQLStatement* statement)
 
     switch (statementType) {
         case StatementType::kStmtSelect:
-            luaStatement = (LuaSQLStatement*)copySelectSatement(
+            luaStatement = (LuaSQLStatement*)copySelectStatement(
                 (hsql::SelectStatement*)statement);
             break;
         // case StatementType::kStmtInsert:
@@ -543,14 +548,14 @@ LuaSQLStatement* copySQLSatement(const hsql::SQLStatement* statement)
         default:
             luaStatement = (LuaSQLStatement*)std::malloc(
                 sizeof(LuaSQLStatement));
-            fillSQLSatement(statement, luaStatement);
+            fillSQLStatement(statement, luaStatement);
             break;
     }
 
     return luaStatement;
 }
 
-void freeSQLSatement(LuaSQLStatement* luaStatement)
+void freeSQLStatement(LuaSQLStatement* luaStatement)
 {
     if (luaStatement == 0)
         return;
@@ -603,7 +608,7 @@ LuaSQLParserResult* copySQLParserResult(hsql::SQLParserResult* result)
         luaResult->statementCount = result->size();
         luaResult->statements =
             copyArr<hsql::SQLStatement, LuaSQLStatement>(
-                &statements, copySQLSatement);
+                &statements, copySQLStatement);
 
         const std::vector<hsql::Expr*>& parameters = result->parameters();
         luaResult->parameterCount = parameters.size();
@@ -624,7 +629,7 @@ void freeSQLParserResult(LuaSQLParserResult* luaResult)
         return;
 
     freeArr<LuaSQLStatement>(luaResult->statements,
-        luaResult->statementCount, freeSQLSatement);
+        luaResult->statementCount, freeSQLStatement);
 
     freeExprArr(luaResult->parameters, luaResult->parameterCount);
     freeStr(luaResult->errorMsg);

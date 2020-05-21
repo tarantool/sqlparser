@@ -80,7 +80,7 @@ getExpr = function(cdata)
     expr.exprListSize = tonumber(cdata.exprListSize)
     expr.exprList = getExprArr(cdata.exprList, expr.exprListSize)
 
-    expr.select = nil
+    expr.select = getSelectStatement(cdata.select)
 
     expr.name = getStr(cdata.name)
     expr.table = getStr(cdata.table)
@@ -145,7 +145,7 @@ getTableRef = function(cdata)
     tableRef.name = getStr(cdata.name)
     tableRef.alias = getAlias(cdata.alias)
 
-    tableRef.select = nil
+    tableRef.select = getSelectStatement(cdata.select)
 
     tableRef.listSize = tonumber(cdata.listSize)
     tableRef.list = getArr(cdata.list, tableRef.listSize, getTableRef)
@@ -213,7 +213,7 @@ getWithDescription = function(cdata)
     local withDesc = { }
 
     withDesc.alias = getStr(cdata.alias)
-    withDesc.select = nil
+    withDesc.select = getSelectStatement(cdata.select)
 
     return withDesc
 end
