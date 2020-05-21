@@ -122,7 +122,7 @@ getAlias = function(cdata)
         return nil
     end
 
-    local alias
+    local alias = { }
 
     alias.name = getStr(cdata.name)
 
