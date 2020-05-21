@@ -28,7 +28,7 @@ void finalize(LuaSQLParserResult* result);
 ]]
 
 local package = package.search("libsqlparser")
-local sql = ffi.load(package)
+local sqlParserLib = ffi.load(package)
 
 local getExpr
 local getExprArr
@@ -318,13 +318,15 @@ end
 
 
 local function parse(query)
-    local result = sql.parseSql(query)
+    assert(query ~= nil, "sqlparser: SQL query string is not specified")
 
-    local luaResult = getSQLParserResult(result)
+    local cdata = sqlParserLib.parseSql(query)
 
-    sql.finalize(result)
+    local obj = getSQLParserResult(cdata)
 
-    return luaResult
+    sqlParserLib.finalize(cdata)
+
+    return obj
 end
 
 return {
