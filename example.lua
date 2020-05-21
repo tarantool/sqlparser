@@ -1,8 +1,12 @@
 #!/usr/bin/env tarantool
 
 local log = require("log")
-local sqlparser = require("sqlparser")
+local parser = require("sqlparser")
 
-local result = sqlparser.parse("select a from test;")
+local ast = parser.parse("select a from test;")
 
-log.info(result)
+log.info(ast)
+
+local queries = parser.tostring(ast)
+
+log.info(queries[1])

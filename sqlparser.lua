@@ -3,6 +3,7 @@
 local fio = require("fio")
 local ffi = require("ffi")
 local parserConst = require("parserConst")
+local sqlgen = require("sqlgen")
 
 local hFilePath = debug.getinfo(1, "S").source
 hFilePath = fio.dirname(hFilePath:sub(2))
@@ -49,10 +50,10 @@ local function getArr(cdata, count, getItem)
         return nil
     end
 
-    count = tonumber(count) - 1
+    count = tonumber(count)
 
     local arr = { }
-    for i = 0, count do
+    for i = 0, count - 1 do
         table.insert(arr, getItem(cdata[i]))
     end
 
@@ -319,5 +320,6 @@ local function parse(query)
 end
 
 return {
-    parse = parse
+    parse = parse,
+    tostring = sqlgen.generate
 }

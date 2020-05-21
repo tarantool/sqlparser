@@ -16,12 +16,12 @@ tarantoolctl rocks install sqlparser
 ## Usage:
 
 ```Lua
-local sqlParser = require("sqlparser")
+local parser = require("sqlparser")
 
-local result = sqlParser.parse("select a from test;")
+local ast = parser.parse("select a from test;")
 ```
 
-`result` variable now contains:
+`ast` variable now contains:
 
 ```json
 {
@@ -61,4 +61,16 @@ local result = sqlParser.parse("select a from test;")
     "parameterCount": 0,
     "isValid": true
 }
+```
+
+And backwards:
+
+```Lua
+local queries = parser.tostring(ast)
+```
+
+`queries[1]` is:
+
+```
+select "a" from "test"
 ```
