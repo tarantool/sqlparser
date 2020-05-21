@@ -40,8 +40,8 @@ local getSetOperation
 local getOrderDescription
 local getWithDescription
 local getLimitDescription
-local getSelectSatement
-local getSQLSatement
+local getSelectStatement
+local getSQLStatement
 local getSQLParserResult
 
 local function getArr(cdata, count, getItem)
@@ -180,7 +180,7 @@ getSetOperation = function(cdata)
     setOp.setType = tonumber(cdata.setType)
     setOp.isAll = cdata.isAll
 
-    setOp.nestedSelectStatement = getSelectSatement(
+    setOp.nestedSelectStatement = getSelectStatement(
         cdata.nestedSelectStatement)
 
     setOp.resultOrderCount = tonumber(cdata.resultOrderCount)
@@ -231,7 +231,7 @@ getLimitDescription = function(cdata)
     return limitDesc
 end
 
-getSelectSatement = function(cdata)
+getSelectStatement = function(cdata)
     if cdata == nil then
         return nil
     end
@@ -267,7 +267,7 @@ getSelectSatement = function(cdata)
     return statement
 end
 
-getSQLSatement = function(cdata)
+getSQLStatement = function(cdata)
     if cdata == nil then
         return nil
     end
@@ -278,7 +278,7 @@ getSQLSatement = function(cdata)
 
     if statementType == parserConst.StatementType.kStmtSelect then
         local cdataEx = ffi.cast("LuaSelectStatement*", cdata)
-        statement = getSelectSatement(cdataEx)
+        statement = getSelectStatement(cdataEx)
     else
         statement = { }
     end
@@ -304,7 +304,7 @@ getSQLParserResult = function(cdata)
 
     result.statementCount = tonumber(cdata.statementCount)
     result.statements = getArr(cdata.statements, result.statementCount,
-        getSQLSatement)
+        getSQLStatement)
 
     result.parameterCount = tonumber(cdata.parameterCount)
     result.parameters = getExprArr(cdata.parameters, result.parameterCount)
