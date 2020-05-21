@@ -49,8 +49,10 @@ local function getArr(cdata, count, getItem)
         return nil
     end
 
+    count = tonumber(count) - 1
+
     local arr = { }
-    for i = 0, count - 1 do
+    for i = 0, count do
         table.insert(arr, getItem(cdata[i]))
     end
 
@@ -76,9 +78,7 @@ getExpr = function(cdata)
 
     expr.expr = getExpr(cdata.expr)
     expr.expr2 = getExpr(cdata.expr2)
-
-    expr.exprListSize = tonumber(cdata.exprListSize)
-    expr.exprList = getExprArr(cdata.exprList, expr.exprListSize)
+    expr.exprList = getExprArr(cdata.exprList, cdata.exprListSize)
 
     expr.select = getSelectStatement(cdata.select)
 
@@ -126,8 +126,7 @@ getAlias = function(cdata)
 
     alias.name = getStr(cdata.name)
 
-    alias.columnCount = tonumber(cdata.columnCount)
-    alias.columns = getArr(cdata.columns, alias.columnCount, getStr)
+    alias.columns = getArr(cdata.columns, cdata.columnCount, getStr)
 
     return alias
 end
@@ -147,8 +146,7 @@ getTableRef = function(cdata)
 
     tableRef.select = getSelectStatement(cdata.select)
 
-    tableRef.listSize = tonumber(cdata.listSize)
-    tableRef.list = getArr(cdata.list, tableRef.listSize, getTableRef)
+    tableRef.list = getArr(cdata.list, cdata.listSize, getTableRef)
 
     tableRef.join = getJoinDefinition(cdata.join)
 
@@ -162,8 +160,7 @@ getGroupByDescription = function(cdata)
 
     local groupBy = { }
 
-    groupBy.columnCount = tonumber(cdata.columnCount)
-    groupBy.columns = getExprArr(cdata.columns, groupBy.columnCount)
+    groupBy.columns = getExprArr(cdata.columns, cdata.columnCount)
 
     groupBy.having = getExpr(cdata.having)
 
@@ -183,8 +180,7 @@ getSetOperation = function(cdata)
     setOp.nestedSelectStatement = getSelectStatement(
         cdata.nestedSelectStatement)
 
-    setOp.resultOrderCount = tonumber(cdata.resultOrderCount)
-    setOp.resultOrder = getArr(cdata.resultOrder, setOp.resultOrderCount,
+    setOp.resultOrder = getArr(cdata.resultOrder, cdata.resultOrderCount,
         getOrderDescription)
 
     setOp.resultLimit = getLimitDescription(cdata.resultLimit)
@@ -242,25 +238,21 @@ getSelectStatement = function(cdata)
 
     statement.selectDistinct = cdata.selectDistinct
 
-    statement.selectListSize = tonumber(cdata.selectListSize)
     statement.selectList = getExprArr(cdata.selectList,
-        statement.selectListSize)
+        cdata.selectListSize)
 
     statement.whereClause = getExpr(cdata.whereClause)
 
     statement.groupBy = getGroupByDescription(cdata.groupBy)
 
-    statement.setOperationCount = tonumber(cdata.setOperationCount)
     statement.setOperations = getArr(cdata.setOperations,
-        statement.setOperationCount, getSetOperation)
+        cdata.setOperationCount, getSetOperation)
 
-    statement.orderCount = tonumber(cdata.orderCount)
-    statement.order = getArr(cdata.order, statement.orderCount,
+    statement.order = getArr(cdata.order, cdata.orderCount,
         getOrderDescription)
 
-    statement.withDescriptionCount = tonumber(cdata.withDescriptionCount)
     statement.withDescriptions = getArr(cdata.withDescriptions,
-        statement.withDescriptionCount, getWithDescription)
+        cdata.withDescriptionCount, getWithDescription)
 
     statement.limit = getLimitDescription(cdata.limit)
 
@@ -287,8 +279,7 @@ getSQLStatement = function(cdata)
 
     statement.stringLength = statement.stringLength
 
-    statement.hintCount = tonumber(cdata.hintCount)
-    statement.hints = getExprArr(cdata.hints, statement.hintCount)
+    statement.hints = getExprArr(cdata.hints, cdata.hintCount)
 
     return statement
 end
@@ -302,12 +293,10 @@ getSQLParserResult = function(cdata)
 
     result.isValid = cdata.isValid
 
-    result.statementCount = tonumber(cdata.statementCount)
-    result.statements = getArr(cdata.statements, result.statementCount,
+    result.statements = getArr(cdata.statements, cdata.statementCount,
         getSQLStatement)
 
-    result.parameterCount = tonumber(cdata.parameterCount)
-    result.parameters = getExprArr(cdata.parameters, result.parameterCount)
+    result.parameters = getExprArr(cdata.parameters, cdata.parameterCount)
 
     result.errorMsg = getStr(cdata.errorMsg)
     result.errorLine = tonumber(cdata.errorLine)
