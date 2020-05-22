@@ -85,12 +85,6 @@ cleanparser:
 cleanall: clean cleanparser
 
 install:
-	cp $(LIB_BUILD) $(INSTALL)/lib/$(LIB_BUILD)
-	rm -rf $(INSTALL)/include/hsql
-	cp -r $(SRC) $(INSTALL)/include/hsql
-	cp LuaSQLParser.h $(INSTALL)/include/hsql
-	cp LuaDataTypes.h $(INSTALL)/include/hsql
-	find $(INSTALL)/include/hsql -not -name '*.h' -type f | xargs rm
 	cp libsqlparser.so $(INST_LIBDIR)
 	cp sqlgen.lua $(INST_LUADIR)
 	cp sqlparser.lua $(INST_LUADIR)
