@@ -1,3 +1,4 @@
+#include <cstring>
 #include "hyrise/src/SQLParser.h"
 #include "LuaSQLParser.h"
 
@@ -59,7 +60,7 @@ ItemDst** copyArr(const std::vector<ItemSrc*>* v,
     ItemDst** arr = (ItemDst**)std::malloc(
         n * sizeof(ItemDst*));
 
-    for (int i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
         arr[i] = copyArrItem((*v)[i]);
 
     return arr;
@@ -71,7 +72,7 @@ void freeArr(Item** arr, size_t count, void (*freeArrItem)(Item*))
     if (arr == 0)
         return;
 
-    for (int i = 0; i < count; i++)
+    for (size_t i = 0; i < count; i++)
         freeArrItem(arr[i]);
 
     free(arr);
@@ -84,7 +85,7 @@ char* copyStr(const char* str)
 
     size_t n = strlen(str) + 1;
     char* strCopy = (char*)std::malloc(n);
-    std::strncpy(strCopy, str, n);
+    std::memcpy(strCopy, str, n);
 
     return strCopy;
 }
