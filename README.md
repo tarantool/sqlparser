@@ -72,5 +72,5 @@ local queries = parser.tostring(ast)
 `queries[1]` is:
 
 ```
-select "a" from "test"
+select "a" from "test";
 ```

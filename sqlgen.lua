@@ -459,7 +459,7 @@ getSelectStatementStr = function(selectStatement)
         end
     end
 
-    return str
+    return str .. ";"
 end
 
 getSQLStatementStr = function(SQLStatement)
