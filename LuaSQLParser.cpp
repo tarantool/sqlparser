@@ -595,8 +595,6 @@ LuaSQLParserResult* copySQLParserResult(hsql::SQLParserResult* result)
     luaResult->errorColumn = 0;
     luaResult->statementCount = 0;
     luaResult->statements = 0;
-    luaResult->parameterCount = 0;
-    luaResult->parameters = 0;
 
     bool isValid = result->isValid();
     luaResult->isValid = isValid;
@@ -609,10 +607,6 @@ LuaSQLParserResult* copySQLParserResult(hsql::SQLParserResult* result)
         luaResult->statements =
             copyArr<hsql::SQLStatement, LuaSQLStatement>(
                 &statements, copySQLStatement);
-
-        const std::vector<hsql::Expr*>& parameters = result->parameters();
-        luaResult->parameterCount = parameters.size();
-        luaResult->parameters = copyExprArr(&parameters);
     }
     else {
         luaResult->errorMsg = copyStr(result->errorMsg());
@@ -631,7 +625,6 @@ void freeSQLParserResult(LuaSQLParserResult* luaResult)
     freeArr<LuaSQLStatement>(luaResult->statements,
         luaResult->statementCount, freeSQLStatement);
 
-    freeExprArr(luaResult->parameters, luaResult->parameterCount);
     freeStr(luaResult->errorMsg);
 
     free(luaResult);

@@ -279,7 +279,4 @@ typedef struct LuaSQLParserResult {
     
     size_t statementCount;
     struct LuaSQLStatement** statements;
-    
-    size_t parameterCount;
-    struct LuaExpr** parameters;
 } LuaSQLParserResult;

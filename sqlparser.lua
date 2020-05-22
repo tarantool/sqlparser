@@ -45,7 +45,7 @@ local getSelectStatement
 local getSQLStatement
 local getSQLParserResult
 
-local function getArr(cdata, count, getItem)
+local function getArr(cdata, count, getItem, params)
     if cdata == nil then
         return nil
     end
@@ -54,7 +54,7 @@ local function getArr(cdata, count, getItem)
 
     local arr = { }
     for i = 0, count - 1 do
-        table.insert(arr, getItem(cdata[i]))
+        table.insert(arr, getItem(cdata[i], params))
     end
 
     return arr
@@ -68,7 +68,7 @@ local function getStr(cdata)
     return ffi.string(cdata)
 end
 
-getExpr = function(cdata)
+getExpr = function(cdata, params)
     if cdata == nil then
         return nil
     end
@@ -76,12 +76,15 @@ getExpr = function(cdata)
     local expr = { }
 
     expr.type = tonumber(cdata.type)
+    if expr.type == parserConst.ExprType.kExprParameter then
+        table.insert(params, expr)
+    end
 
-    expr.expr = getExpr(cdata.expr)
-    expr.expr2 = getExpr(cdata.expr2)
-    expr.exprList = getExprArr(cdata.exprList, cdata.exprListSize)
+    expr.expr = getExpr(cdata.expr, params)
+    expr.expr2 = getExpr(cdata.expr2, params)
+    expr.exprList = getExprArr(cdata.exprList, cdata.exprListSize, params)
 
-    expr.select = getSelectStatement(cdata.select)
+    expr.select = getSelectStatement(cdata.select, params)
 
     expr.name = getStr(cdata.name)
     expr.table = getStr(cdata.table)
@@ -98,20 +101,20 @@ getExpr = function(cdata)
     return expr
 end
 
-getExprArr = function(cdata, count)
-    return getArr(cdata, count, getExpr)
+getExprArr = function(cdata, count, params)
+    return getArr(cdata, count, getExpr, params)
 end
 
-getJoinDefinition = function(cdata)
+getJoinDefinition = function(cdata, params)
     if cdata == nil then
         return nil
     end
 
     local joinDefinition = { }
 
-    joinDefinition.left = getTableRef(cdata.left)
-    joinDefinition.right = getTableRef(cdata.right)
-    joinDefinition.condition = getExpr(cdata.condition)
+    joinDefinition.left = getTableRef(cdata.left, params)
+    joinDefinition.right = getTableRef(cdata.right, params)
+    joinDefinition.condition = getExpr(cdata.condition, params)
 
     joinDefinition.type = tonumber(cdata.type)
 
@@ -132,7 +135,7 @@ getAlias = function(cdata)
     return alias
 end
 
-getTableRef = function(cdata)
+getTableRef = function(cdata, params)
     if cdata == nil then
         return nil
     end
@@ -145,30 +148,31 @@ getTableRef = function(cdata)
     tableRef.name = getStr(cdata.name)
     tableRef.alias = getAlias(cdata.alias)
 
-    tableRef.select = getSelectStatement(cdata.select)
+    tableRef.select = getSelectStatement(cdata.select, params)
 
-    tableRef.list = getArr(cdata.list, cdata.listSize, getTableRef)
+    tableRef.list = getArr(cdata.list, cdata.listSize,
+        getTableRef, params)
 
-    tableRef.join = getJoinDefinition(cdata.join)
+    tableRef.join = getJoinDefinition(cdata.join, params)
 
     return tableRef
 end
 
-getGroupByDescription = function(cdata)
+getGroupByDescription = function(cdata, params)
     if cdata == nil then
         return nil
     end
 
     local groupBy = { }
 
-    groupBy.columns = getExprArr(cdata.columns, cdata.columnCount)
+    groupBy.columns = getExprArr(cdata.columns, cdata.columnCount, params)
 
-    groupBy.having = getExpr(cdata.having)
+    groupBy.having = getExpr(cdata.having, params)
 
     return groupBy
 end
 
-getSetOperation = function(cdata)
+getSetOperation = function(cdata, params)
     if cdata == nil then
         return nil
     end
@@ -179,17 +183,17 @@ getSetOperation = function(cdata)
     setOp.isAll = cdata.isAll
 
     setOp.nestedSelectStatement = getSelectStatement(
-        cdata.nestedSelectStatement)
+        cdata.nestedSelectStatement, params)
 
     setOp.resultOrder = getArr(cdata.resultOrder, cdata.resultOrderCount,
-        getOrderDescription)
+        getOrderDescription, params)
 
-    setOp.resultLimit = getLimitDescription(cdata.resultLimit)
+    setOp.resultLimit = getLimitDescription(cdata.resultLimit, params)
 
     return setOp
 end
 
-getOrderDescription = function(cdata)
+getOrderDescription = function(cdata, params)
     if cdata == nil then
         return nil
     end
@@ -197,12 +201,12 @@ getOrderDescription = function(cdata)
     local orderDesc = { }
 
     orderDesc.type = tonumber(cdata.type)
-    orderDesc.expr = getExpr(cdata.expr)
+    orderDesc.expr = getExpr(cdata.expr, params)
 
     return orderDesc
 end
 
-getWithDescription = function(cdata)
+getWithDescription = function(cdata, params)
     if cdata == nil then
         return nil
     end
@@ -210,57 +214,57 @@ getWithDescription = function(cdata)
     local withDesc = { }
 
     withDesc.alias = getStr(cdata.alias)
-    withDesc.select = getSelectStatement(cdata.select)
+    withDesc.select = getSelectStatement(cdata.select, params)
 
     return withDesc
 end
 
-getLimitDescription = function(cdata)
+getLimitDescription = function(cdata, params)
     if cdata == nil then
         return nil
     end
 
     local limitDesc = { }
 
-    limitDesc.limit = getExpr(cdata.limit)
-    limitDesc.offset = getExpr(cdata.offset)
+    limitDesc.limit = getExpr(cdata.limit, params)
+    limitDesc.offset = getExpr(cdata.offset, params)
 
     return limitDesc
 end
 
-getSelectStatement = function(cdata)
+getSelectStatement = function(cdata, params)
     if cdata == nil then
         return nil
     end
 
     local statement = { }
 
-    statement.fromTable = getTableRef(cdata.fromTable)
+    statement.fromTable = getTableRef(cdata.fromTable, params)
 
     statement.selectDistinct = cdata.selectDistinct
 
     statement.selectList = getExprArr(cdata.selectList,
-        cdata.selectListSize)
+        cdata.selectListSize, params)
 
-    statement.whereClause = getExpr(cdata.whereClause)
+    statement.whereClause = getExpr(cdata.whereClause, params)
 
-    statement.groupBy = getGroupByDescription(cdata.groupBy)
+    statement.groupBy = getGroupByDescription(cdata.groupBy, params)
 
     statement.setOperations = getArr(cdata.setOperations,
-        cdata.setOperationCount, getSetOperation)
+        cdata.setOperationCount, getSetOperation, params)
 
     statement.order = getArr(cdata.order, cdata.orderCount,
-        getOrderDescription)
+        getOrderDescription, params)
 
     statement.withDescriptions = getArr(cdata.withDescriptions,
-        cdata.withDescriptionCount, getWithDescription)
+        cdata.withDescriptionCount, getWithDescription, params)
 
-    statement.limit = getLimitDescription(cdata.limit)
+    statement.limit = getLimitDescription(cdata.limit, params)
 
     return statement
 end
 
-getSQLStatement = function(cdata)
+getSQLStatement = function(cdata, params)
     if cdata == nil then
         return nil
     end
@@ -271,7 +275,7 @@ getSQLStatement = function(cdata)
 
     if statementType == parserConst.StatementType.kStmtSelect then
         local cdataEx = ffi.cast("LuaSelectStatement*", cdata)
-        statement = getSelectStatement(cdataEx)
+        statement = getSelectStatement(cdataEx, params)
     else
         statement = { }
     end
@@ -280,7 +284,7 @@ getSQLStatement = function(cdata)
 
     statement.stringLength = statement.stringLength
 
-    statement.hints = getExprArr(cdata.hints, cdata.hintCount)
+    statement.hints = getExprArr(cdata.hints, cdata.hintCount, params)
 
     return statement
 end
@@ -294,10 +298,14 @@ getSQLParserResult = function(cdata)
 
     result.isValid = cdata.isValid
 
-    result.statements = getArr(cdata.statements, cdata.statementCount,
-        getSQLStatement)
+    result.parameters = { }
 
-    result.parameters = getExprArr(cdata.parameters, cdata.parameterCount)
+    result.statements = getArr(cdata.statements, cdata.statementCount,
+        getSQLStatement, result.parameters)
+
+    table.sort(result.parameters, function(a, b)
+        return a.ival <  b.ival
+    end)
 
     result.errorMsg = getStr(cdata.errorMsg)
     result.errorLine = tonumber(cdata.errorLine)
