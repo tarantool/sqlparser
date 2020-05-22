@@ -94,7 +94,7 @@ install:
 	cp libsqlparser.so $(INST_LIBDIR)
 	cp sqlgen.lua $(INST_LUADIR)
 	cp sqlparser.lua $(INST_LUADIR)
-	cp parserConst.lua $(INST_LUADIR)
+	cp sqlparserConst.lua $(INST_LUADIR)
 	cp LuaDataTypes.h $(INST_LUADIR)
 
 

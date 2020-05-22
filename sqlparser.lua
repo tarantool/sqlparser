@@ -2,7 +2,7 @@
 
 local fio = require("fio")
 local ffi = require("ffi")
-local parserConst = require("parserConst")
+local parserConst = require("sqlparserConst")
 local sqlgen = require("sqlgen")
 
 local hFilePath = debug.getinfo(1, "S").source

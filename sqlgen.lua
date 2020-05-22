@@ -1,6 +1,6 @@
 #!/usr/bin/env tarantool
 
-local parserConst = require("parserConst")
+local parserConst = require("sqlparserConst")
 
 local getOperatorTypeStr
 local getExprStr
