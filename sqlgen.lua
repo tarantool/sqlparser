@@ -3,6 +3,7 @@
 local parserConst = require("sqlparserConst")
 
 local getOperatorTypeStr
+local getDatetimeFieldStr
 local getExprStr
 local getExprArrStr
 local getJoinTypeStr
@@ -19,8 +20,6 @@ local getSelectStatementStr
 local getSQLStatementStr
 
 local operatorTypeToStr = {
-    [parserConst.OperatorType.kOpNone] = "",
-
     -- Ternary operator
     [parserConst.OperatorType.kOpBetween] = "",
 
@@ -70,6 +69,15 @@ local setOperationTypeToStr = {
     [parserConst.SetType.kSetUnion] = "union",
     [parserConst.SetType.kSetIntersect] = "intersect",
     [parserConst.SetType.kSetExcept] = "except"
+}
+
+local datetimeFieldToStr = {
+    [parserConst.DatetimeField.kDatetimeSecond] = "second",
+    [parserConst.DatetimeField.kDatetimeMinute] = "minute",
+    [parserConst.DatetimeField.kDatetimeHour] = "hour",
+    [parserConst.DatetimeField.kDatetimeDay] = "day",
+    [parserConst.DatetimeField.kDatetimeMonth] = "month",
+    [parserConst.DatetimeField.kDatetimeYear] = "year"
 }
 
 local function getArrStr(arr, getItemStr)
@@ -132,6 +140,15 @@ getOperatorTypeStr = function(operatorType)
     return str
 end
 
+local function getDatetimeFieldStr(datetimeField)
+    local str = datetimeFieldToStr[datetimeField]
+
+    assert(str ~= nil, "sqlparser: unknown date-time field type: " ..
+        tostring(datetimeField))
+
+    return str
+end
+
 getExprStr = function(expr)
     assert(expr ~= nil, "sqlparser: expression is not specified")
 
@@ -162,7 +179,18 @@ getExprStr = function(expr)
     elseif exprType == parserConst.ExprType.kExprColumnRef then
         str = '"' .. expr.name .. '"'
     elseif exprType == parserConst.ExprType.kExprFunctionRef then
-        str = expr.name .. "(" .. getExprArrStr(expr.exprList) .. ")"
+        if expr.datetimeField > 0 then
+            if string.lower(expr.name) == "extract" then
+                str = "extract(" ..
+                    getDatetimeFieldStr(expr.datetimeField) .. " from " ..
+                    getExprStr(expr.expr) .. ")"
+            else
+                error("sqlparser: unknown date-time function: " ..
+                    tostring(expr.name))
+            end
+        else
+            str = expr.name .. "(" .. getExprArrStr(expr.exprList) .. ")"
+        end
     elseif exprType == parserConst.ExprType.kExprOperator then
         local strOp = getOperatorTypeStr(expr.opType)
 
@@ -177,6 +205,9 @@ getExprStr = function(expr)
                 str = getExprStr(expr.expr) .. " " .. strOp
             elseif expr.opType == parserConst.OperatorType.kOpExists then
                 str = strOp .. "(" .. getSelectStatementStr(expr.select) .. ")"
+            else
+                error("sqlparser: unknown unary operator type: " ..
+                    tostring(expr.opType))
             end
         elseif arity == 2 then
             str = getExprStr(expr.expr) .. " " .. strOp .. " "
@@ -189,10 +220,15 @@ getExprStr = function(expr)
                 error("sqlparser: the second operand of a binary operator is not set: " ..
                     strOp)
             end
-        elseif arity == 3  then
-            str = getExprStr(expr.expr) .. " between " ..
-                getExprStr(expr.exprList[1]) .. " and " ..
-                getExprStr(expr.exprList[2])
+        elseif arity == 3 then
+            if expr.opType == parserConst.OperatorType.kOpBetween then
+                str = getExprStr(expr.expr) .. " between " ..
+                    getExprStr(expr.exprList[1]) .. " and " ..
+                    getExprStr(expr.exprList[2])
+            else
+                error("sqlparser: unknown ternary operator type: " ..
+                    tostring(expr.opType))
+            end
         elseif arity == -1 then
             if expr.opType == parserConst.OperatorType.kOpCase then
                 str = "case"
@@ -229,7 +265,7 @@ getExprStr = function(expr)
     elseif exprType == parserConst.ExprType.kExprArrayIndex then
         str = getExprStr(expr.expr) .. "[" .. tostring(expr.ival) .. "]"
     elseif exprType == parserConst.ExprType.kExprDatetimeField then
-
+        str = getDatetimeFieldStr(expr.datetimeField)
     else
         error("sqlparser: unknown expression type: " .. tostring(exprType))
     end
