@@ -223,11 +223,11 @@ getExprStr = function(expr)
     elseif exprType == parserConst.ExprType.kExprSelect then
         str = "(" .. getSelectStatementStr(expr.select) .. ")"
     elseif exprType == parserConst.ExprType.kExprHint then
-
+        error("sqlparser: unhandled expression type: " .. tostring(exprType))
     elseif exprType == parserConst.ExprType.kExprArray then
-
+        str = "array [" .. getExprArrStr(expr.exprList) .. "]"
     elseif exprType == parserConst.ExprType.kExprArrayIndex then
-
+        str = getExprStr(expr.expr) .. "[" .. tostring(expr.ival) .. "]"
     elseif exprType == parserConst.ExprType.kExprDatetimeField then
 
     else
