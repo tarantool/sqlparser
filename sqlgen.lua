@@ -53,8 +53,8 @@ local operatorTypeToStr = {
     -- Unary operators.
     [parserConst.OperatorType.kOpNot] = "not",
     [parserConst.OperatorType.kOpUnaryMinus] = "-",
-    [parserConst.OperatorType.kOpIsNull] = "",
-    [parserConst.OperatorType.kOpExists] = ""
+    [parserConst.OperatorType.kOpIsNull] = "is null",
+    [parserConst.OperatorType.kOpExists] = "exists"
 }
 
 local joinTypeToStr = {
@@ -169,7 +169,15 @@ getExprStr = function(expr)
         local arity = getOperatorArity(expr.opType)
 
         if arity == 1 then
-            str = strOp .. " " .. getExprStr(expr.expr)
+            if expr.opType == parserConst.OperatorType.kOpNot then
+                str = strOp .. " " .. getExprStr(expr.expr)
+            elseif expr.opType == parserConst.OperatorType.kOpUnaryMinus then
+                str = strOp .. getExprStr(expr.expr)
+            elseif expr.opType == parserConst.OperatorType.kOpIsNull then
+                str = getExprStr(expr.expr) .. " " .. strOp
+            elseif expr.opType == parserConst.OperatorType.kOpExists then
+                str = strOp .. "(" .. getSelectStatementStr(expr.select) .. ")"
+            end
         elseif arity == 2 then
             str = getExprStr(expr.expr) .. " " .. strOp .. " "
 
@@ -459,7 +467,7 @@ getSelectStatementStr = function(selectStatement)
         end
     end
 
-    return str .. ";"
+    return str
 end
 
 getSQLStatementStr = function(SQLStatement)
@@ -475,7 +483,7 @@ getSQLStatementStr = function(SQLStatement)
             SQLStatement.type))
     end
 
-    return str
+    return str .. ";"
 end
 
 local function generate(ast)
