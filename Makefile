@@ -65,10 +65,10 @@ $(SRCPARSER)/flex_lexer.o: $(SRCPARSER)/flex_lexer.cpp $(SRCPARSER)/bison_parser
 %.o: %.cpp $(PARSER_CPP) $(LIB_H)
 	$(CXX) $(LIB_CFLAGS) -c -o $@ $<
 
-$(SRCPARSER)/bison_parser.cpp: $(SRCPARSER)/bison_parser.y
+$(SRCPARSER)/bison_parser.cpp:
 	$(GMAKE) -C $(SRCPARSER)/ bison_parser.cpp
 
-$(SRCPARSER)/flex_lexer.cpp: $(SRCPARSER)/flex_lexer.l
+$(SRCPARSER)/flex_lexer.cpp:
 	$(GMAKE) -C $(SRCPARSER)/ flex_lexer.cpp
 
 $(SRCPARSER)/bison_parser.h: $(SRCPARSER)/bison_parser.cpp
