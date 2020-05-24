@@ -5,7 +5,7 @@ The project is based on [Hyrise SQL parser](https://github.com/hyrise/sql-parser
 
 ## Requirements:
 
-- gcc 4.8+ (or clang 3.4+)
+- gcc 5+ or clang 5+
 
 ## Installation:
 
