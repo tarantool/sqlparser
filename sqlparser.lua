@@ -68,6 +68,40 @@ local function getStr(cdata)
     return ffi.string(cdata)
 end
 
+local function getOperatorArity(opType)
+    if opType == nil then
+        return nil
+    end
+
+    if opType == parserConst.OperatorType.kOpNone then
+        return 0
+    end
+
+    if opType == parserConst.OperatorType.kOpBetween then
+        return 3
+    end
+
+    if opType == parserConst.OperatorType.kOpCase or
+        opType == parserConst.OperatorType.kOpCaseListElement
+    then
+        return -1
+    end
+
+    if opType >= parserConst.OperatorType.kOpPlus and
+        opType <= parserConst.OperatorType.kOpConcat
+    then
+        return 2
+    end
+
+    if opType >= parserConst.OperatorType.kOpNot and
+        opType <= parserConst.OperatorType.kOpExists
+    then
+        return 1
+    end
+
+    return nil
+end
+
 getExpr = function(cdata, params)
     if cdata == nil then
         return nil
@@ -75,8 +109,10 @@ getExpr = function(cdata, params)
 
     local expr = { }
 
-    expr.type = tonumber(cdata.type)
-    if expr.type == parserConst.ExprType.kExprParameter then
+    local exprType = parserConst.getExprTypeStr(cdata.type)
+    expr.type = exprType
+
+    if exprType == "parameter" then
         table.insert(params, expr)
     end
 
@@ -89,14 +125,42 @@ getExpr = function(cdata, params)
     expr.name = getStr(cdata.name)
     expr.table = getStr(cdata.table)
     expr.alias = getStr(cdata.alias)
-    expr.fval = tonumber(cdata.fval)
-    expr.ival = tonumber(cdata.ival)
-    expr.ival2 = tonumber(cdata.ival2)
-    expr.datetimeField = tonumber(cdata.datetimeField)
-    expr.isBoolLiteral = cdata.isBoolLiteral
 
-    expr.opType = tonumber(cdata.opType)
-    expr.distinct = cdata.distinct
+    if exprType == "literalFloat" then
+        expr.value = tonumber(cdata.fval)
+    elseif exprType == "literalString" then
+        expr.value = getStr(cdata.name)
+    elseif exprType == "literalInt" then
+        local n = tonumber(cdata.ival)
+        if cdata.isBoolLiteral then
+            expr.value = (n == 0)
+        else
+            expr.value = n
+        end
+    elseif exprType == "literalNull" then
+        expr.value = box.NULL
+    elseif exprType == "parameter" then
+        expr.paramId = tonumber(cdata.ival)
+    elseif exprType == "columnRef" then
+        expr.name = getStr(cdata.name)
+        expr.table = getStr(cdata.table)
+        expr.alias = getStr(cdata.alias)
+    elseif exprType == "functionRef" then
+        expr.distinct = cdata.distinct
+    elseif exprType == "operator" then
+        local opTypeNum = tonumber(cdata.opType)
+        expr.name = parserConst.getOperatorTypeStr(opTypeNum)
+        expr.arity = getOperatorArity(opTypeNum)
+    elseif exprType == "select" then
+        expr.alias = getStr(cdata.alias)
+    elseif exprType == "hint" then
+        expr.name = getStr(cdata.name)
+    elseif exprType == "arrayIndex" then
+        expr.index = tonumber(cdata.ival)
+    elseif exprType == "datetimeField" then
+        expr.datetimeField =
+            parserConst.getDatetimeFieldStr(cdata.datetimeField)
+    end
 
     return expr
 end
@@ -116,7 +180,8 @@ getJoinDefinition = function(cdata, params)
     joinDefinition.right = getTableRef(cdata.right, params)
     joinDefinition.condition = getExpr(cdata.condition, params)
 
-    joinDefinition.type = tonumber(cdata.type)
+    joinDefinition.type =
+        parserConst.getJoinTypeStr(cdata.type)
 
     return joinDefinition
 end
@@ -142,7 +207,7 @@ getTableRef = function(cdata, params)
 
     local tableRef = { }
 
-    tableRef.type = tonumber(cdata.type)
+    tableRef.type = parserConst.getTableRefTypeStr(cdata.type)
 
     tableRef.schema = getStr(cdata.schema)
     tableRef.name = getStr(cdata.name)
@@ -179,7 +244,8 @@ getSetOperation = function(cdata, params)
 
     local setOp = { }
 
-    setOp.setType = tonumber(cdata.setType)
+    setOp.setType = parserConst.getSetTypeStr(cdata.setType)
+
     setOp.isAll = cdata.isAll
 
     setOp.nestedSelectStatement = getSelectStatement(
@@ -200,7 +266,8 @@ getOrderDescription = function(cdata, params)
 
     local orderDesc = { }
 
-    orderDesc.type = tonumber(cdata.type)
+    orderDesc.type = parserConst.getOrderTypeStr(cdata.type)
+
     orderDesc.expr = getExpr(cdata.expr, params)
 
     return orderDesc
@@ -271,9 +338,10 @@ getSQLStatement = function(cdata, params)
 
     local statement
 
-    local statementType = tonumber(cdata.type)
+    local statementType =
+        parserConst.getStatementTypeStr(cdata.type)
 
-    if statementType == parserConst.StatementType.kStmtSelect then
+    if statementType == "select" then
         local cdataEx = ffi.cast("LuaSelectStatement*", cdata)
         statement = getSelectStatement(cdataEx, params)
     else
@@ -304,7 +372,7 @@ getSQLParserResult = function(cdata)
         getSQLStatement, result.parameters)
 
     table.sort(result.parameters, function(a, b)
-        return a.ival <  b.ival
+        return a.paramId < b.paramId
     end)
 
     result.errorMsg = getStr(cdata.errorMsg)

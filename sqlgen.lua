@@ -1,84 +1,17 @@
 #!/usr/bin/env tarantool
 
-local parserConst = require("sqlparserConst")
-
-local getOperatorTypeStr
-local getDatetimeFieldStr
 local getExprStr
 local getExprArrStr
-local getJoinTypeStr
 local getJoinDefinitionStr
 local getAliasStr
 local getTableRefStr
 local getGroupByDescriptionStr
-local getSetOperationTypeStr
 local getSetOperationStr
 local getOrderDescriptionStr
 local getWithDescriptionStr
 local getLimitDescriptionStr
 local getSelectStatementStr
 local getSQLStatementStr
-
-local operatorTypeToStr = {
-    -- Ternary operator
-    [parserConst.OperatorType.kOpBetween] = "",
-
-    -- n-nary special case
-    [parserConst.OperatorType.kOpCase] = "",
-    [parserConst.OperatorType.kOpCaseListElement] = "", -- `WHEN expr THEN expr`
-
-    -- Binary operators.
-    [parserConst.OperatorType.kOpPlus] = "+",
-    [parserConst.OperatorType.kOpMinus] = "-",
-    [parserConst.OperatorType.kOpAsterisk] = "*",
-    [parserConst.OperatorType.kOpSlash] = "/",
-    [parserConst.OperatorType.kOpPercentage] = "%",
-    [parserConst.OperatorType.kOpCaret] = "^",
-
-    [parserConst.OperatorType.kOpEquals] = "=",
-    [parserConst.OperatorType.kOpNotEquals] = "<>",
-    [parserConst.OperatorType.kOpLess] = "<",
-    [parserConst.OperatorType.kOpLessEq] = "<=",
-    [parserConst.OperatorType.kOpGreater] = ">",
-    [parserConst.OperatorType.kOpGreaterEq] = ">=",
-    [parserConst.OperatorType.kOpLike] = "like",
-    [parserConst.OperatorType.kOpNotLike] = "not like",
-    [parserConst.OperatorType.kOpILike] = "ilike",
-    [parserConst.OperatorType.kOpAnd] = "and",
-    [parserConst.OperatorType.kOpOr] = "or",
-    [parserConst.OperatorType.kOpIn] = "in",
-    [parserConst.OperatorType.kOpConcat] = "+",
-
-    -- Unary operators.
-    [parserConst.OperatorType.kOpNot] = "not",
-    [parserConst.OperatorType.kOpUnaryMinus] = "-",
-    [parserConst.OperatorType.kOpIsNull] = "is null",
-    [parserConst.OperatorType.kOpExists] = "exists"
-}
-
-local joinTypeToStr = {
-    [parserConst.JoinType.kJoinInner] = "inner join",
-    [parserConst.JoinType.kJoinFull] = "full join",
-    [parserConst.JoinType.kJoinLeft] = "left join",
-    [parserConst.JoinType.kJoinRight] = "right join",
-    [parserConst.JoinType.kJoinCross] = "cross join",
-    [parserConst.JoinType.kJoinNatural] = "natural join"
-}
-
-local setOperationTypeToStr = {
-    [parserConst.SetType.kSetUnion] = "union",
-    [parserConst.SetType.kSetIntersect] = "intersect",
-    [parserConst.SetType.kSetExcept] = "except"
-}
-
-local datetimeFieldToStr = {
-    [parserConst.DatetimeField.kDatetimeSecond] = "second",
-    [parserConst.DatetimeField.kDatetimeMinute] = "minute",
-    [parserConst.DatetimeField.kDatetimeHour] = "hour",
-    [parserConst.DatetimeField.kDatetimeDay] = "day",
-    [parserConst.DatetimeField.kDatetimeMonth] = "month",
-    [parserConst.DatetimeField.kDatetimeYear] = "year"
-}
 
 local function getArrStr(arr, getItemStr)
     if arr == nil then
@@ -98,57 +31,6 @@ local function getArrStr(arr, getItemStr)
     return str
 end
 
-local function getOperatorArity(opType)
-    assert(opType ~= nil, "sqlparser: operator type is not specified")
-
-    if opType == parserConst.OperatorType.kOpNone then
-        return 0
-    end
-
-    if opType == parserConst.OperatorType.kOpBetween then
-        return 3
-    end
-
-    if opType == parserConst.OperatorType.kOpCase or
-        opType == parserConst.OperatorType.kOpCaseListElement
-    then
-        return -1
-    end
-
-    if opType >= parserConst.OperatorType.kOpPlus and
-        opType <= parserConst.OperatorType.kOpConcat
-    then
-        return 2
-    end
-
-    if opType >= parserConst.OperatorType.kOpNot and
-        opType <= parserConst.OperatorType.kOpExists
-    then
-        return 1
-    end
-
-    error("sqlparser: unknown operator type: " ..
-        tostring(opType))
-end
-
-getOperatorTypeStr = function(operatorType)
-    local str = operatorTypeToStr[operatorType]
-
-    assert(str ~= nil, "sqlparser: unknown operator type: " ..
-        tostring(operatorType))
-
-    return str
-end
-
-local function getDatetimeFieldStr(datetimeField)
-    local str = datetimeFieldToStr[datetimeField]
-
-    assert(str ~= nil, "sqlparser: unknown date-time field type: " ..
-        tostring(datetimeField))
-
-    return str
-end
-
 getExprStr = function(expr)
     assert(expr ~= nil, "sqlparser: expression is not specified")
 
@@ -156,33 +38,25 @@ getExprStr = function(expr)
 
     local str
 
-    if exprType == parserConst.ExprType.kExprLiteralFloat then
-        str = tostring(expr.fval)
-    elseif exprType == parserConst.ExprType.kExprLiteralString then
-        str = "'" .. expr.name:gsub("'", "''") .. "'"
-    elseif exprType == parserConst.ExprType.kExprLiteralInt then
-        if not expr.isBoolLiteral then
-            str = tostring(expr.ival)
-        else
-            if expr.ival == 0 then
-                str = "false"
-            else
-                str = "true"
-            end
-        end
-    elseif exprType == parserConst.ExprType.kExprLiteralNull then
+    if exprType == "literalFloat" then
+        str = tostring(expr.value)
+    elseif exprType == "literalString" then
+        str = "'" .. expr.value:gsub("'", "''") .. "'"
+    elseif exprType == "literalInt" then
+        str = tostring(expr.value)
+    elseif exprType == "literalNull" then
         str = "null"
-    elseif exprType == parserConst.ExprType.kExprStar then
+    elseif exprType == "star" then
         str = "*"
-    elseif exprType == parserConst.ExprType.kExprParameter then
+    elseif exprType == "parameter" then
         str = "?"
-    elseif exprType == parserConst.ExprType.kExprColumnRef then
+    elseif exprType == "columnRef" then
         str = '"' .. expr.name .. '"'
-    elseif exprType == parserConst.ExprType.kExprFunctionRef then
-        if expr.datetimeField > 0 then
+    elseif exprType == "functionRef" then
+        if expr.datetimeField ~= nil then
             if string.lower(expr.name) == "extract" then
                 str = "extract(" ..
-                    getDatetimeFieldStr(expr.datetimeField) .. " from " ..
+                    expr.datetimeField .. " from " ..
                     getExprStr(expr.expr) .. ")"
             else
                 error("sqlparser: unknown date-time function: " ..
@@ -191,50 +65,49 @@ getExprStr = function(expr)
         else
             str = expr.name .. "(" .. getExprArrStr(expr.exprList) .. ")"
         end
-    elseif exprType == parserConst.ExprType.kExprOperator then
-        local strOp = getOperatorTypeStr(expr.opType)
-
-        local arity = getOperatorArity(expr.opType)
+    elseif exprType == "operator" then
+        local op = expr.name
+        local arity = expr.arity
 
         if arity == 1 then
-            if expr.opType == parserConst.OperatorType.kOpNot then
-                str = strOp .. " " .. getExprStr(expr.expr)
-            elseif expr.opType == parserConst.OperatorType.kOpUnaryMinus then
-                str = strOp .. getExprStr(expr.expr)
-            elseif expr.opType == parserConst.OperatorType.kOpIsNull then
-                str = getExprStr(expr.expr) .. " " .. strOp
-            elseif expr.opType == parserConst.OperatorType.kOpExists then
-                str = strOp .. "(" .. getSelectStatementStr(expr.select) .. ")"
+            if op == "not" then
+                str = "not " .. getExprStr(expr.expr)
+            elseif op == "-" then
+                str = "-" .. getExprStr(expr.expr)
+            elseif op == "is null" then
+                str = getExprStr(expr.expr) .. " is null"
+            elseif op == "exists" then
+                str = "exists(" .. getSelectStatementStr(expr.select) .. ")"
             else
                 error("sqlparser: unknown unary operator type: " ..
-                    tostring(expr.opType))
+                    tostring(expr.op))
             end
         elseif arity == 2 then
-            str = getExprStr(expr.expr) .. " " .. strOp .. " "
+            str = getExprStr(expr.expr) .. " " .. op .. " "
 
-            if expr.expr2 ~= nil then
-                str = str .. getExprStr(expr.expr2)
-            elseif expr.exprList ~= nil then
+            if op == "in" then
                 str = str .. "(" .. getExprArrStr(expr.exprList) .. ")"
+            elseif expr.expr2 ~= nil then
+                str = str .. getExprStr(expr.expr2)
             else
                 error("sqlparser: the second operand of a binary operator is not set: " ..
-                    strOp)
+                    tostring(op))
             end
         elseif arity == 3 then
-            if expr.opType == parserConst.OperatorType.kOpBetween then
+            if op == "between" then
                 str = getExprStr(expr.expr) .. " between " ..
                     getExprStr(expr.exprList[1]) .. " and " ..
                     getExprStr(expr.exprList[2])
             else
                 error("sqlparser: unknown ternary operator type: " ..
-                    tostring(expr.opType))
+                    tostring(expr.op))
             end
         elseif arity == -1 then
-            if expr.opType == parserConst.OperatorType.kOpCase then
+            if op == "case" then
                 str = "case"
 
-                for _, expr in ipairs(expr.exprList) do
-                    str = str .. getExprStr(expr)
+                for _, e in ipairs(expr.exprList) do
+                    str = str .. getExprStr(e)
                 end
 
                 if expr.expr2 ~= nil then
@@ -242,30 +115,30 @@ getExprStr = function(expr)
                 end
 
                 str = str .. " end"
-            elseif expr.opType == parserConst.OperatorType.kOpCaseListElement then
+            elseif op == "when" then
                 str = " when " .. getExprStr(expr.expr) ..
                     " then " .. getExprStr(expr.expr2)
             else
                 error("sqlparser: unknown n-ary operator type: " ..
-                    tostring(expr.opType))
+                    tostring(op))
             end
         elseif arity == 0 then
-            error("sqlparser: unhandled operator type (NOOP): " ..
-                tostring(expr.opType))
+            error("sqlparser: unhandled operator type: " ..
+                tostring(op))
         else
             error("sqlparser: unhandled operator arity: " ..
                 tostring(arity))
         end
-    elseif exprType == parserConst.ExprType.kExprSelect then
+    elseif exprType == "select" then
         str = "(" .. getSelectStatementStr(expr.select) .. ")"
-    elseif exprType == parserConst.ExprType.kExprHint then
+    elseif exprType == "hint" then
         error("sqlparser: unhandled expression type: " .. tostring(exprType))
-    elseif exprType == parserConst.ExprType.kExprArray then
+    elseif exprType == "array" then
         str = "array [" .. getExprArrStr(expr.exprList) .. "]"
-    elseif exprType == parserConst.ExprType.kExprArrayIndex then
-        str = getExprStr(expr.expr) .. "[" .. tostring(expr.ival) .. "]"
-    elseif exprType == parserConst.ExprType.kExprDatetimeField then
-        str = getDatetimeFieldStr(expr.datetimeField)
+    elseif exprType == "arrayIndex" then
+        str = getExprStr(expr.expr) .. "[" .. tostring(expr.index) .. "]"
+    elseif exprType == "datetimeField" then
+        str = expr.datetimeField
     else
         error("sqlparser: unknown expression type: " .. tostring(exprType))
     end
@@ -287,19 +160,10 @@ getExprArrStr = function(arr)
     return getArrStr(arr, getExprStr)
 end
 
-getJoinTypeStr = function(joinType)
-    local str = joinTypeToStr[joinType]
-
-    assert(str ~= nil, "sqlparser: unknown join type: " ..
-        tostring(joinType))
-
-    return str
-end
-
 getJoinDefinitionStr = function(joinDefinition)
     assert(joinDefinition ~= nil, "sqlparser: join definition is not specified")
 
-    local strJoin = getJoinTypeStr(joinDefinition.type)
+    local strJoin = joinDefinition.type .. " join"
 
     local strLeft = getTableRefStr(joinDefinition.left)
 
@@ -328,18 +192,21 @@ getTableRefStr = function(tableRef)
 
     local tableRefType = tableRef.type
 
-    if tableRefType == parserConst.TableRefType.kTableName then
+    if tableRefType == "table" then
         str = '"' .. tableRef.name .. '"'
 
         if tableRef.schema ~= nil then
             str = '"' .. tableRef.schema .. '"' .. "." .. str
         end
-    elseif tableRefType == parserConst.TableRefType.kTableSelect then
+    elseif tableRefType == "select" then
         str = "(" .. getSelectStatementStr(tableRef.select) .. ")"
-    elseif tableRefType == parserConst.TableRefType.kTableJoin then
+    elseif tableRefType == "join" then
         str = getJoinDefinitionStr(tableRef.join)
-    elseif tableRefType == parserConst.TableRefType.kTableCrossProduct then
+    elseif tableRefType == "crossProduct" then
         str = getArrStr(tableRef.list, getTableRefStr)
+    else
+        error("sqlparser: unknown table reference type: " ..
+            tostring(tableRefType))
     end
 
     if tableRef.alias ~= nil then
@@ -362,22 +229,11 @@ getGroupByDescriptionStr = function(groupBy)
     return str
 end
 
-getSetOperationTypeStr = function(setOperationType)
-    local str = setOperationTypeToStr[setOperationType]
-
-    assert(str ~= nil, "sqlparser: unknown set operation type: " ..
-        tostring(setOperationType))
-
-    return str
-end
-
 getSetOperationStr = function(setOp)
     assert(setOp ~= nil,
         "sqlparser: 'set' operation description is not specified")
 
-    local strSetOp = getSetOperationTypeStr(setOp.setType)
-
-    local str = " " .. strSetOp .. " "
+    local str = " " .. setOp.setType .. " "
 
     if setOp.isAll then
         str = " all "
@@ -403,7 +259,7 @@ getOrderDescriptionStr = function(orderBy)
     local str = getArrStr(orderBy, function(item)
         local s = getExprStr(item.expr)
 
-        if item.type == parserConst.OrderType.kOrderDesc then
+        if item.type == "desc" then
             s = s .. " desc"
         end
 
@@ -512,7 +368,7 @@ getSQLStatementStr = function(SQLStatement)
 
     local str
 
-    if SQLStatement.type == parserConst.StatementType.kStmtSelect then
+    if SQLStatement.type == "select" then
         str = getSelectStatementStr(SQLStatement)
     else
         error(("Generating of an SQL query string for statement type '%s' is not implemented"):format(
