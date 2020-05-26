@@ -1,21 +1,4 @@
-local ExprType = {
-    kExprLiteralFloat = 0,
-    kExprLiteralString = 1,
-    kExprLiteralInt = 2,
-    kExprLiteralNull = 3,
-    kExprStar = 4,
-    kExprParameter = 5,
-    kExprColumnRef = 6,
-    kExprFunctionRef = 7,
-    kExprOperator = 8,
-    kExprSelect = 9,
-    kExprHint = 10,
-    kExprArray = 11,
-    kExprArrayIndex = 12,
-    kExprDatetimeField = 13
-}
-
-local ExprTypeName = {
+local ExprTypeStr = {
     "literalFloat",
     "literalString",
     "literalInt",
@@ -39,7 +22,7 @@ local function getExprTypeStr(value)
         return nil
     end
 
-    local str = ExprTypeName[value + 1]
+    local str = ExprTypeStr[value + 1]
 
     if str == nil then
         error("sqlparser: unknown expression type: " ..
@@ -50,17 +33,7 @@ local function getExprTypeStr(value)
 end
 
 
-local DatetimeField = {
-    kDatetimeNone = 0,
-    kDatetimeSecond = 1,
-    kDatetimeMinute = 2,
-    kDatetimeHour = 3,
-    kDatetimeDay = 4,
-    kDatetimeMonth = 5,
-    kDatetimeYear = 6
-}
-
-local DatetimeFieldName = {
+local DatetimeFieldStr = {
     "second",
     "minute",
     "hour",
@@ -76,7 +49,7 @@ local function getDatetimeFieldStr(value)
         return nil
     end
 
-    local str = DatetimeFieldName[value + 1]
+    local str = DatetimeFieldStr[value + 1]
 
     if str == nil then
         error("sqlparser: unknown date-time field: " ..
@@ -88,45 +61,45 @@ end
 
 
 local OperatorType = {
-    kOpNone = 0,
+    None = 0,
 
     -- Ternary operator
-    kOpBetween = 1,
+    Between = 1,
 
     -- n-nary special case
-    kOpCase = 2,
-    kOpCaseListElement = 3, -- `WHEN expr THEN expr`
+    Case = 2,
+    CaseListElement = 3, -- `WHEN expr THEN expr`
 
     -- Binary operators.
-    kOpPlus = 4,
-    kOpMinus = 5,
-    kOpAsterisk = 6,
-    kOpSlash = 7,
-    kOpPercentage = 8,
-    kOpCaret = 9,
+    Plus = 4,
+    Minus = 5,
+    Asterisk = 6,
+    Slash = 7,
+    Percentage = 8,
+    Caret = 9,
 
-    kOpEquals = 10,
-    kOpNotEquals = 11,
-    kOpLess = 12,
-    kOpLessEq = 13,
-    kOpGreater = 14,
-    kOpGreaterEq = 15,
-    kOpLike = 16,
-    kOpNotLike = 17,
-    kOpILike = 18,
-    kOpAnd = 19,
-    kOpOr = 20,
-    kOpIn = 21,
-    kOpConcat = 22,
+    Equals = 10,
+    NotEquals = 11,
+    Less = 12,
+    LessEq = 13,
+    Greater = 14,
+    GreaterEq = 15,
+    Like = 16,
+    NotLike = 17,
+    iLike = 18,
+    And = 19,
+    Or = 20,
+    In = 21,
+    Concat = 22,
 
     -- Unary operators.
-    kOpNot = 23,
-    kOpUnaryMinus = 24,
-    kOpIsNull = 25,
-    kOpExists = 26
+    Not = 23,
+    UnaryMinus = 24,
+    IsNull = 25,
+    Exists = 26
 }
 
-local OperatorTypeName = {
+local OperatorTypeStr = {
     "",
 
     -- Ternary operator
@@ -172,7 +145,7 @@ local function getOperatorTypeStr(value)
         return nil
     end
 
-    local str = OperatorTypeName[value + 1]
+    local str = OperatorTypeStr[value + 1]
 
     if str == nil then
         error("sqlparser: unknown operator type: " ..
@@ -183,25 +156,7 @@ local function getOperatorTypeStr(value)
 end
 
 
-local StatementType = {
-    kStmtError = 0, -- unused
-    kStmtSelect = 1,
-    kStmtImport = 2,
-    kStmtInsert = 3,
-    kStmtUpdate = 4,
-    kStmtDelete = 5,
-    kStmtCreate = 6,
-    kStmtDrop = 7,
-    kStmtPrepare = 8,
-    kStmtExecute = 9,
-    kStmtExport = 10,
-    kStmtRename = 11,
-    kStmtAlter = 12,
-    kStmtShow = 13,
-    kStmtTransaction = 14
-}
-
-local StatementTypeName = {
+local StatementTypeStr = {
     "error", -- unused
     "select",
     "import",
@@ -226,7 +181,7 @@ local function getStatementTypeStr(value)
         return nil
     end
 
-    local str = StatementTypeName[value + 1]
+    local str = StatementTypeStr[value + 1]
 
     if str == nil then
         error("sqlparser: unknown statement type: " ..
@@ -237,16 +192,7 @@ local function getStatementTypeStr(value)
 end
 
 
-local JoinType = {
-    kJoinInner = 0,
-    kJoinFull = 1,
-    kJoinLeft = 2,
-    kJoinRight = 3,
-    kJoinCross = 4,
-    kJoinNatural = 5
-}
-
-local JoinTypeName = {
+local JoinTypeStr = {
     "inner",
     "full",
     "left",
@@ -262,7 +208,7 @@ local function getJoinTypeStr(value)
         return nil
     end
 
-    local str = JoinTypeName[value + 1]
+    local str = JoinTypeStr[value + 1]
 
     if str == nil then
         error("sqlparser: unknown join type: " ..
@@ -273,14 +219,7 @@ local function getJoinTypeStr(value)
 end
 
 
-local TableRefType = {
-    kTableName = 0,
-    kTableSelect = 1,
-    kTableJoin = 2,
-    kTableCrossProduct = 3
-}
-
-local TableRefTypeName = {
+local TableRefTypeStr = {
     "table",
     "select",
     "join",
@@ -294,7 +233,7 @@ local function getTableRefTypeStr(value)
         return nil
     end
 
-    local str = TableRefTypeName[value + 1]
+    local str = TableRefTypeStr[value + 1]
 
     if str == nil then
         error("sqlparser: unknown table reference type: " ..
@@ -305,12 +244,7 @@ local function getTableRefTypeStr(value)
 end
 
 
-local OrderType = {
-    kOrderAsc = 0,
-    kOrderDesc = 1
-}
-
-local OrderTypeName = {
+local OrderTypeStr = {
     "asc",
     "desc"
 }
@@ -322,7 +256,7 @@ local function getOrderTypeStr(value)
         return nil
     end
 
-    local str = OrderTypeName[value + 1]
+    local str = OrderTypeStr[value + 1]
 
     if str == nil then
         error("sqlparser: unknown ordering type: " ..
@@ -333,13 +267,7 @@ local function getOrderTypeStr(value)
 end
 
 
-local SetType = {
-    kSetUnion = 0,
-    kSetIntersect = 1,
-    kSetExcept = 2
-}
-
-local SetTypeName = {
+local SetTypeStr = {
     "union",
     "intersect",
     "except"
@@ -352,7 +280,7 @@ local function getSetTypeStr(value)
         return nil
     end
 
-    local str = SetTypeName[value + 1]
+    local str = SetTypeStr[value + 1]
 
     if str == nil then
         error("sqlparser: unknown set operation: " ..
@@ -364,14 +292,7 @@ end
 
 
 return {
-    ExprType = ExprType,
-    DatetimeField = DatetimeField,
     OperatorType = OperatorType,
-    StatementType = StatementType,
-    JoinType = JoinType,
-    TableRefType = TableRefType,
-    OrderType = OrderType,
-    SetType = SetType,
 
     getExprTypeStr = getExprTypeStr,
     getDatetimeFieldStr = getDatetimeFieldStr,

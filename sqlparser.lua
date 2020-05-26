@@ -73,28 +73,30 @@ local function getOperatorArity(opType)
         return nil
     end
 
-    if opType == parserConst.OperatorType.kOpNone then
+    local OperatorType = parserConst.OperatorType
+
+    if opType == OperatorType.None then
         return 0
     end
 
-    if opType == parserConst.OperatorType.kOpBetween then
+    if opType == OperatorType.Between then
         return 3
     end
 
-    if opType == parserConst.OperatorType.kOpCase or
-        opType == parserConst.OperatorType.kOpCaseListElement
+    if opType == OperatorType.Case or
+        opType == OperatorType.CaseListElement
     then
         return -1
     end
 
-    if opType >= parserConst.OperatorType.kOpPlus and
-        opType <= parserConst.OperatorType.kOpConcat
+    if opType >= OperatorType.Plus and
+        opType <= OperatorType.Concat
     then
         return 2
     end
 
-    if opType >= parserConst.OperatorType.kOpNot and
-        opType <= parserConst.OperatorType.kOpExists
+    if opType >= OperatorType.Not and
+        opType <= OperatorType.Exists
     then
         return 1
     end
