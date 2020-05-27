@@ -62,6 +62,9 @@ getExprStr = function(expr, allowAlias)
                 error("sqlparser: unknown date-time function: " ..
                     tostring(expr.name))
             end
+        elseif expr.distinct then
+            str = expr.name .. "(distinct " ..
+                getExprArrStr(expr.exprList) .. ")"
         else
             str = expr.name .. "(" .. getExprArrStr(expr.exprList) .. ")"
         end
