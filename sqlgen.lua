@@ -13,7 +13,7 @@ local getLimitDescriptionStr
 local getSelectStatementStr
 local getSQLStatementStr
 
-local function getArrStr(arr, getItemStr)
+local function getArrStr(arr, getItemStr, ...)
     if arr == nil then
         return ""
     end
@@ -21,7 +21,7 @@ local function getArrStr(arr, getItemStr)
     local str = ""
 
     for _, item in ipairs(arr) do
-        str = str .. getItemStr(item) .. ", "
+        str = str .. getItemStr(item, ...) .. ", "
     end
 
     if str:sub(-2) == ", " then
@@ -31,7 +31,7 @@ local function getArrStr(arr, getItemStr)
     return str
 end
 
-getExprStr = function(expr)
+getExprStr = function(expr, allowAlias)
     assert(expr ~= nil, "sqlparser: expression is not specified")
 
     local exprType = expr.type
@@ -147,17 +147,17 @@ getExprStr = function(expr)
         str = '"' .. expr.table .. '"' .. "." .. str
     end
 
-    if expr.alias ~= nil then
+    if allowAlias and expr.alias ~= nil then
         str = str .. " as " .. '"' .. expr.alias .. '"'
     end
 
     return str
 end
 
-getExprArrStr = function(arr)
+getExprArrStr = function(arr, allowAlias)
     assert(arr ~= nil, "sqlparser: expressions list is not specified")
 
-    return getArrStr(arr, getExprStr)
+    return getArrStr(arr, getExprStr, allowAlias)
 end
 
 getJoinDefinitionStr = function(joinDefinition)
@@ -313,7 +313,7 @@ getSelectStatementStr = function(selectStatement)
         str = "select distinct "
     end
 
-    str = str .. getExprArrStr(selectStatement.selectList)
+    str = str .. getExprArrStr(selectStatement.selectList, true)
 
     if selectStatement.fromTable ~= nil then
         str = str .. " from " .. getTableRefStr(selectStatement.fromTable)
