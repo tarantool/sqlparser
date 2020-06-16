@@ -129,6 +129,8 @@ LuaExpr* copyExpr(const hsql::Expr* expr)
     luaExpr->ival = expr->ival;
     luaExpr->ival2 = expr->ival2;
     luaExpr->datetimeField = (DatetimeField)expr->datetimeField;
+    luaExpr->columnType = (ColumnType)expr->columnType.data_type;
+    luaExpr->columnLength = expr->columnType.length;
     luaExpr->isBoolLiteral = expr->isBoolLiteral;
 
     luaExpr->opType = (OperatorType)expr->opType;

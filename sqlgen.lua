@@ -62,6 +62,19 @@ getExprStr = function(expr, allowAlias)
                 error("sqlparser: unknown date-time function: " ..
                     tostring(expr.name))
             end
+        elseif expr.columnType ~= nil then
+            if string.lower(expr.name) == "cast" then
+                local columnType = expr.columnType
+                if expr.columnLength ~= nil then
+                    columnType = columnType .. "(" ..
+                        tostring(expr.columnLength) .. ")"
+                end
+                str = "cast(" .. getExprStr(expr.expr) ..
+                    " as " .. columnType .. ")"
+            else
+                error("sqlparser: unknown type casting function: " ..
+                    tostring(expr.name))
+            end
         elseif expr.distinct then
             str = expr.name .. "(distinct " ..
                 getExprArrStr(expr.exprList) .. ")"

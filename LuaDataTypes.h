@@ -25,6 +25,17 @@ enum DatetimeField {
     kDatetimeYear
 };
 
+enum ColumnType {
+    UNKNOWN,
+    INT,
+    LONG,
+    FLOAT,
+    DOUBLE,
+    CHAR,
+    VARCHAR,
+    TEXT
+};
+
 enum OperatorType {
     kOpNone,
 
@@ -143,6 +154,8 @@ typedef struct LuaExpr {
     int64_t ival;
     int64_t ival2;
     enum DatetimeField datetimeField;
+    enum ColumnType columnType;
+    int64_t columnLength;
     bool isBoolLiteral;
 
     enum OperatorType opType;
@@ -160,8 +173,6 @@ typedef struct LuaAlias {
     size_t columnCount;
     char** columns;
 } LuaAlias;
-
-struct LuaTableRef;
 
 // Definition of a join construct.
 typedef struct LuaJoinDefinition {
