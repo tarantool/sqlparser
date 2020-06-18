@@ -1,0 +1,235 @@
+- - A generic query
+  - select a from test;
+  - select "a" from "test";
+
+- - Quoted identifiers
+  - select "a" from "test";
+
+- - Asterisk
+  - select * from "test";
+
+- - Several columns
+  - select "a", "b", "c" from "test";
+
+- - Aliases
+  - select "id" as "Process ID", "name" as "Name" from "process";
+
+- - Table aliases
+  - select "p"."id", "p"."name" from "process" as "p";
+
+- - Table aliases without AS
+  - select "p"."id", "p"."name" from "process" "p";
+  - select "p"."id", "p"."name" from "process" as "p";
+
+- - CASE operator
+  - select
+      "a",
+      case
+        when "b" = 1 then 10
+        when "b" = 2 then 20
+        else 30
+      end as "b10",
+      "c"
+    from "test";
+
+- - WHERE clause
+  - select "a", "b", "c" from "test" where "d" = 'some string';
+
+- - Boolean expressions
+  -
+    select "a", "b", "c"
+    from "test"
+    where "d" = 'some string'
+        and "e" <> 'another sting'
+        or "f" >= 10;
+
+#- - Boolean expressions with brackets
+#  -
+#    select "a", "b", "c"
+#    from "test"
+#    where "d" = 'some string'
+#        and "e" <> 'another sting'
+#        and ("f" < 10 or "g" > 20);
+
+- - LIKE operator
+  - select "a", "b", "c" from "test" where "d" like 'some str%%';
+
+- - NOT LIKE operator
+  - select "a", "b", "c" from "test" where "d" not like 'some str%%';
+
+- - ILIKE operator
+  - select "a", "b", "c" from "test" where "d" ilike 'some str%%';
+
+- - BETWEEN operator
+  - select "a" from "test" where "b" between 10 and 100;
+
+- - IN operator
+  - select "a" from "test" where "b" in (1, 2, 3);
+
+- - Expressions
+  - select "a" + "b" from "test";
+
+- - Functions
+  - select max("a") from "test";
+
+- - COUNT DISTINCT
+  - select count(distinct "a") from "test";
+
+#- - CAST operator
+#  - select cast("id" as float) from "test";
+
+#- - CAST as varchar
+#  - select cast("id" as varchar(8)) from "test";
+
+- - Grouping
+  - select "a", max("b") from "test" group by "a";
+
+- - HAVING clause
+  -
+    select "a", max("b")
+    from "test"
+    group by "a"
+    having count("c") > 100;
+
+- - HAVING and WHERE
+  -
+    select "a", max("b")
+    from "test"
+    where "c" < 50
+    group by "a"
+    having count("d") > 100;
+
+- - LIMIT clause
+  - select "a", "b", "c" from "test" limit 10;
+
+- - LIMIT and OFFSET
+  - select "a", "b", "c" from "test" limit 10 offset 20;
+
+- - HAVING, WHERE, LIMIT and OFFSET
+  -
+    select "a", max("b")
+    from "test"
+    where "c" < 50
+    group by "a"
+    having count("d") > 100
+    limit 20
+    offset 40;
+
+- - INNER JOIN
+  -
+    select "process"."id", "event"."name"
+    from "process"
+        inner join "event" on "process"."id" = "event"."process_id";
+
+- - INNER JOIN with aliases
+  -
+    select "p"."id", "e"."name"
+    from "process" as "p"
+        inner join "event" as "e" on "p"."id" = "e"."process_id";
+
+- - LEFT JOIN
+  -
+    select "p"."id", "e"."name"
+    from "process" as "p"
+        left join "event" as "e" on "p"."id" = "e"."process_id";
+
+- - Cartesian product
+  -
+    select "p"."id", "e"."name"
+    from "process" as "p", "event" as "e";
+
+- - Several joins
+  -
+    select "p"."id", "c"."hash", "e"."name", "ea"."name"
+    from "process" as "p"
+        inner join "chain" as "c" on "p"."id" = "c"."process_id"
+        inner join "event" as "e" on "p"."id" = "e"."process_id"
+        left join "event_attrs" as "ea" on "e"."id" = "ea"."event_id";
+
+- - Several joins, where, having and limit
+  -
+    select
+        "e"."process_id" as "Proccess ID",
+        max("e"."duration") as "Maximum duration"
+    from "event" as "e"
+        left join "event_attrs" as "ea" on "e"."id" = "ea"."event_id"
+    where "ea"."name" = 'cost' and "ea"."value" > 10000
+    group by "e"."process_id"
+    having count(*) > 10
+    limit 50
+    offset 100;
+
+- - Subquery
+  -
+    select "t"."a", "t"."b"
+    from (select "a", "b" from "test") as "t";
+
+#- - CTE
+#  -
+#    with
+#        "cte1" as (select "a", "b" from "table2")
+#    select "a", "b" * "b"
+#    from "cte"
+#        inner join "cte1" on "cte"."a" = "cte1"."a"
+#            or "cte"."b" = "cte1"."b";
+
+#- - Several CTEs
+#  -
+#    with
+#        "cte1" as (select "a", "b" from "table2"),
+#        "cte2" as (select "a", "b" from "table3")
+#    select "a", "b" * "b"
+#    from "cte"
+#        inner join "cte1" on "cte"."a" = "cte1"."a"
+#            or "cte"."b" = "cte1"."b"
+#        left join "cte2" on "cte"."a" = "cte2"."a"
+#            or "cte"."b" = "cte2"."b";
+
+- - UNION clause
+  -
+    (select "t"."a", "t"."b", "t"."c" from "test" as "t")
+    union
+    (select "t2"."a", "t2"."b", "t2"."c" from "test2" as "t2");
+
+#- - UNION ALL clause
+#  -
+#    (select "t"."a", "t"."b", "t"."c" from "test" as "t")
+#    union all
+#    (select "t2"."a", "t2"."b", "t2"."c" from "test2" as "t2");
+
+#- - Several UNION clauses
+#  -
+#    (select "t"."a", "t"."b", "t"."c" from "test" as "t")
+#    union
+#    (select "t2"."a", "t2"."b", "t2"."c" from "test2" as "t2")
+#    union
+#    (select "t3"."a", "t3"."b", "t3"."c" from "test3" as "t3");
+
+- - INTERSECT clause
+  -
+    (select "t"."a", "t"."b", "t"."c" from "test" as "t")
+    intersect
+    (select "t2"."a", "t2"."b", "t2"."c" from "test2" as "t2");
+
+#- - Several INTERSECT clauses
+#  -
+#    (select "t"."a", "t"."b", "t"."c" from "test" as "t")
+#    intersect
+#    (select "t2"."a", "t2"."b", "t2"."c" from "test2" as "t2")
+#    intersect
+#    (select "t3"."a", "t3"."b", "t3"."c" from "test3" as "t3");
+
+#- - UNION and INTERSECT clauses
+#  -
+#    (select "t"."a", "t"."b", "t"."c" from "test" as "t")
+#    union
+#    (select "t2"."a", "t2"."b", "t2"."c" from "test2" as "t2")
+#    union all
+#    (select "t3"."a", "t3"."b", "t3"."c" from "test3" as "t3")
+#    intersect
+#    (select "t4"."a", "t4"."b", "t4"."c" from "test4" as "t4");
+
+- - Parameters
+  - select "a"
+    from "test"
+    where "b" = ? and "c" = ? or "d" = ?;

@@ -1,0 +1,15 @@
+os: linux
+language: cpp
+compiler: gcc
+
+jobs:
+    include:
+      - name: "CentOS 8"
+        env: OS=el DIST=8
+
+install:
+  - curl -L https://tarantool.io/installer.sh | VER=2.2 sudo -E bash
+  - tarantoolctl rocks install sqlparser
+
+script:
+  - make test
