@@ -47,7 +47,7 @@ local function testSql(test, queryOrig, queryGen)
 end
 
 
-local queries = readFromFile("queries.yaml")
+local queries = readFromFile("queries.yml")
 
 local test = tap.test("Tarantool SQL Parser Test")
 
