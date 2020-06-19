@@ -191,11 +191,11 @@
     union
     (select "t2"."a", "t2"."b", "t2"."c" from "test2" as "t2");
 
-#- - UNION ALL clause
-#  -
-#    (select "t"."a", "t"."b", "t"."c" from "test" as "t")
-#    union all
-#    (select "t2"."a", "t2"."b", "t2"."c" from "test2" as "t2");
+- - UNION ALL clause
+  -
+    (select "t"."a", "t"."b", "t"."c" from "test" as "t")
+    union all
+    (select "t2"."a", "t2"."b", "t2"."c" from "test2" as "t2");
 
 #- - Several UNION clauses
 #  -

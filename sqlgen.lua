@@ -252,7 +252,7 @@ getSetOperationStr = function(setOp)
     local str = " " .. setOp.setType .. " "
 
     if setOp.isAll then
-        str = " all "
+        str = str .. "all "
     end
 
     str = str .. "(" .. getSelectStatementStr(setOp.nestedSelectStatement) .. ")"
