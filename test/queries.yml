@@ -146,7 +146,7 @@
         inner join "event" as "e" on "p"."id" = "e"."process_id"
         left join "event_attrs" as "ea" on "e"."id" = "ea"."event_id";
 
-- - Several joins, where, having and limit
+- - Several joins, WHERE, HAVING and LIMIT
   -
     select
         "e"."process_id" as "Proccess ID",
@@ -196,6 +196,14 @@
     (select "t"."a", "t"."b", "t"."c" from "test" as "t")
     union all
     (select "t2"."a", "t2"."b", "t2"."c" from "test2" as "t2");
+
+- - UNION clause with LIMIT
+  -
+    (select "t"."a", "t"."b", "t"."c" from "test" as "t")
+    union
+    (select "t2"."a", "t2"."b", "t2"."c" from "test2" as "t2")
+    limit 10
+    offset 100;
 
 #- - Several UNION clauses
 #  -
