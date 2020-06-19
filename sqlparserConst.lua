@@ -59,6 +59,34 @@ local function getDatetimeFieldStr(value)
     return str
 end
 
+local ColumnTypeStr = {
+    "unknown",
+    "int",
+    "long",
+    "float",
+    "double",
+    "char",
+    "varchar",
+    "text"
+}
+
+local function getColumnTypeStr(value)
+    value = tonumber(value)
+
+    if value == nil then
+        return nil
+    end
+
+    local str = ColumnTypeStr[value + 1]
+
+    if str == nil then
+        error("sqlparser: unknown column type: " ..
+            tostring(value))
+    end
+
+    return str
+end
+
 
 local OperatorType = {
     None = 0,
@@ -296,6 +324,7 @@ return {
 
     getExprTypeStr = getExprTypeStr,
     getDatetimeFieldStr = getDatetimeFieldStr,
+    getColumnTypeStr = getColumnTypeStr,
     getOperatorTypeStr = getOperatorTypeStr,
     getStatementTypeStr = getStatementTypeStr,
     getJoinTypeStr = getJoinTypeStr,

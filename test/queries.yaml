@@ -75,11 +75,11 @@
 - - COUNT DISTINCT
   - select count(distinct "a") from "test";
 
-#- - CAST operator
-#  - select cast("id" as float) from "test";
+- - CAST operator
+  - select cast("id" as float) from "test";
 
-#- - CAST as varchar
-#  - select cast("id" as varchar(8)) from "test";
+- - CAST as varchar
+  - select cast("id" as varchar(8)) from "test";
 
 - - Grouping
   - select "a", max("b") from "test" group by "a";

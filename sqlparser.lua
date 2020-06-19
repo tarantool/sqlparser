@@ -143,25 +143,31 @@ getExpr = function(cdata, params)
         expr.value = box.NULL
     elseif exprType == "parameter" then
         expr.paramId = tonumber(cdata.ival)
-    elseif exprType == "columnRef" then
-        expr.name = getStr(cdata.name)
-        expr.table = getStr(cdata.table)
-        expr.alias = getStr(cdata.alias)
     elseif exprType == "functionRef" then
         expr.distinct = cdata.distinct
+
+        local datetimeField = tonumber(cdata.datetimeField)
+        if cdata.datetimeField > 0 then
+            expr.datetimeField =
+                parserConst.getDatetimeFieldStr(datetimeField)
+        end
+
+        local columnType = tonumber(cdata.columnType)
+        if columnType > 0 then
+            expr.columnType =
+                parserConst.getColumnTypeStr(columnType)
+        end
+
+        local columnLength = tonumber(cdata.columnLength)
+        if columnLength > 0 then
+            expr.columnLength = columnLength
+        end
     elseif exprType == "operator" then
         local opTypeNum = tonumber(cdata.opType)
         expr.name = parserConst.getOperatorTypeStr(opTypeNum)
         expr.arity = getOperatorArity(opTypeNum)
-    elseif exprType == "select" then
-        expr.alias = getStr(cdata.alias)
-    elseif exprType == "hint" then
-        expr.name = getStr(cdata.name)
     elseif exprType == "arrayIndex" then
         expr.index = tonumber(cdata.ival)
-    elseif exprType == "datetimeField" then
-        expr.datetimeField =
-            parserConst.getDatetimeFieldStr(cdata.datetimeField)
     end
 
     return expr
