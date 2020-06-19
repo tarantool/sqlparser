@@ -26,39 +26,23 @@ local ast = parser.parse("select a from test;")
 ```json
 {
     "parameters": [],
-    "statementCount": 1,
     "errorLine": 0,
     "statements": [
         {
-            "setOperationCount": 0,
             "fromTable": {
-                "type": 0,
-                "name": "test",
-                "listSize": 0
+                "type": "table",
+                "name": "test"
             },
-            "selectDistinct": false,
-            "orderCount": 0,
-            "hintCount": 0,
             "selectList": [
                 {
-                    "ival2": 0,
-                    "exprListSize": 0,
-                    "distinct": false,
-                    "isBoolLiteral": false,
-                    "opType": 0,
-                    "datetimeField": 0,
-                    "type": 6,
-                    "ival": 0,
-                    "name": "a",
-                    "fval": 0
+                    "type": "columnRef",
+                    "name": "a"
                 }
             ],
-            "type": 1,
-            "withDescriptionCount": 0,
-            "selectListSize": 1
+            "selectDistinct": false,
+            "type": "select"
         }
     ],
-    "parameterCount": 0,
     "isValid": true
 }
 ```
