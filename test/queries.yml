@@ -164,26 +164,26 @@
     select "t"."a", "t"."b"
     from (select "a", "b" from "test") as "t";
 
-#- - CTE
-#  -
-#    with
-#        "cte1" as (select "a", "b" from "table2")
-#    select "a", "b" * "b"
-#    from "cte"
-#        inner join "cte1" on "cte"."a" = "cte1"."a"
-#            or "cte"."b" = "cte1"."b";
+- - CTE
+  -
+    with
+        "cte1" as (select "a", "b" from "table2")
+    select "a", "b" * "b"
+    from "cte"
+        inner join "cte1" on "cte"."a" = "cte1"."a"
+            or "cte"."b" = "cte1"."b";
 
-#- - Several CTEs
-#  -
-#    with
-#        "cte1" as (select "a", "b" from "table2"),
-#        "cte2" as (select "a", "b" from "table3")
-#    select "a", "b" * "b"
-#    from "cte"
-#        inner join "cte1" on "cte"."a" = "cte1"."a"
-#            or "cte"."b" = "cte1"."b"
-#        left join "cte2" on "cte"."a" = "cte2"."a"
-#            or "cte"."b" = "cte2"."b";
+- - Several CTEs
+  -
+    with
+        "cte1" as (select "a", "b" from "table2"),
+        "cte2" as (select "a", "b" from "table3")
+    select "a", "b" * "b"
+    from "cte"
+        inner join "cte1" on "cte"."a" = "cte1"."a"
+            or "cte"."b" = "cte1"."b"
+        left join "cte2" on "cte"."a" = "cte2"."a"
+            or "cte"."b" = "cte2"."b";
 
 - - UNION clause
   -
