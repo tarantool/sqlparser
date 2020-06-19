@@ -295,7 +295,7 @@ getWithDescriptionStr = function(withDesc)
 
     local strSelect = getSelectStatementStr(withDesc.select)
 
-    local str = withDesc.alias .. " as (" .. strSelect .. ")"
+    local str = "\"" .. withDesc.alias .. "\" as (" .. strSelect .. ")"
 
     return str
 end
