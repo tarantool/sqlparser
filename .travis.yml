@@ -6,7 +6,7 @@ jobs:
     include:
       - name: "CentOS 8"
         env: OS=el DIST=8
-      - name: "Ubuntu Disco (19.04)"
+      - name: "Ubuntu Disco"
         env: OS=ubuntu DIST=disco
 
 install:

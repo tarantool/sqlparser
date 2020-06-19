@@ -31,7 +31,7 @@ local function getArrStr(arr, getItemStr, ...)
     return str
 end
 
-getExprStr = function(expr, allowAlias)
+getExprStr = function(expr, nested, allowAlias)
     assert(expr ~= nil, "sqlparser: expression is not specified")
 
     local exprType = expr.type
@@ -104,7 +104,16 @@ getExprStr = function(expr, allowAlias)
             if op == "in" then
                 str = str .. "(" .. getExprArrStr(expr.exprList) .. ")"
             elseif expr.expr2 ~= nil then
-                str = str .. getExprStr(expr.expr2)
+                str = str .. getExprStr(expr.expr2, true)
+                if nested and (
+                    op == "+" or
+                    op == "-" or
+                    op == "or" or
+                    op == "||" or
+                    op == "|")
+                then
+                    str = "(" .. str .. ")"
+                end
             else
                 error("sqlparser: the second operand of a binary operator is not set: " ..
                     tostring(op))
@@ -173,7 +182,7 @@ end
 getExprArrStr = function(arr, allowAlias)
     assert(arr ~= nil, "sqlparser: expressions list is not specified")
 
-    return getArrStr(arr, getExprStr, allowAlias)
+    return getArrStr(arr, getExprStr, false, allowAlias)
 end
 
 getJoinDefinitionStr = function(joinDefinition)
