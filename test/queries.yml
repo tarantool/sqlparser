@@ -43,13 +43,13 @@
         and "e" <> 'another sting'
         or "f" >= 10;
 
-#- - Boolean expressions with brackets
-#  -
-#    select "a", "b", "c"
-#    from "test"
-#    where "d" = 'some string'
-#        and "e" <> 'another sting'
-#        and ("f" < 10 or "g" > 20);
+- - Boolean expressions with brackets
+  -
+    select "a", "b", "c"
+    from "test"
+    where "d" = 'some string'
+        and "e" <> 'another sting'
+        and ("f" < 10 or "g" > 20);
 
 - - LIKE operator
   - select "a", "b", "c" from "test" where "d" like 'some str%%';
