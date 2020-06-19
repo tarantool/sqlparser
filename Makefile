@@ -126,22 +126,13 @@ TEST_CPP     = $(shell find hyrise/test/ -name '*.cpp')
 TEST_ALL     = $(shell find hyrise/test/ -name '*.cpp') $(shell find hyrise/test/ -name '*.h')
 EXAMPLE_SRC  = $(shell find example/ -name '*.cpp') $(shell find example/ -name '*.h')
 
-test: $(TEST_BUILD)
-	bash hyrise/test/test.sh
+.PHONY: test
+test:
+	cd test && ./test.lua
 
-$(TEST_BUILD): $(TEST_ALL) $(LIB_BUILD)
-	@mkdir -p $(BIN)/
-	$(CXX) $(TEST_CFLAGS) $(TEST_CPP) -o $(TEST_BUILD) -lsqlparser -lstdc++
-
-test_example:
-	$(GMAKE) -C example/
-	LD_LIBRARY_PATH=./ \
-	  ./example/example "SELECT * FROM students WHERE name = 'Max Mustermann';"
-
-test_format:
-	@! astyle --options=astyle.options $(LIB_ALL) | grep -q "Formatted"
-	@! astyle --options=astyle.options $(TEST_ALL) | grep -q "Formatted"
-
+.PHONY: test-example
+test-example:
+	./example.lua
 
 
 ########################################
