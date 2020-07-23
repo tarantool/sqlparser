@@ -8,6 +8,12 @@
 - - Asterisk
   - select * from "test";
 
+- - Boolean true
+  - select true;
+
+- - Boolean false
+  - select false;
+
 - - Several columns
   - select "a", "b", "c" from "test";
 

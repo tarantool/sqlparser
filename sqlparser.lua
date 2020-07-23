@@ -135,7 +135,7 @@ getExpr = function(cdata, params)
     elseif exprType == "literalInt" then
         local n = tonumber(cdata.ival)
         if cdata.isBoolLiteral then
-            expr.value = (n == 0)
+            expr.value = (n ~= 0)
         else
             expr.value = n
         end
