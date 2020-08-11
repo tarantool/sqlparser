@@ -69,8 +69,17 @@
 - - BETWEEN operator
   - select "a" from "test" where "b" between 10 and 100;
 
-- - IN operator
+- - IN list operator
   - select "a" from "test" where "b" in (1, 2, 3);
+
+- - IN subquery operator
+  -
+    select "a"
+    from "test"
+    where "b" in (
+        select "b"
+        from "test2"
+        where "c" = 'qwerty');
 
 - - Expressions
   - select "a" + "b" from "test";
