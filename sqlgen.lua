@@ -102,7 +102,11 @@ getExprStr = function(expr, nested, allowAlias)
             str = getExprStr(expr.expr) .. " " .. op .. " "
 
             if op == "in" then
-                str = str .. "(" .. getExprArrStr(expr.exprList) .. ")"
+                if expr.exprList ~= nil then
+                    str = str .. "(" .. getExprArrStr(expr.exprList) .. ")"
+                else
+                    str = str .. "(" .. getSelectStatementStr(expr.select) .. ")"
+                end
             elseif expr.expr2 ~= nil then
                 str = str .. getExprStr(expr.expr2, true)
                 if nested and (
