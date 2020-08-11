@@ -39,13 +39,24 @@ local function testSql(test, queryOrig, queryGen)
     test:is(ast.isValid, true, "Parsed successfully")
 
     queryGen = queryGen or queryOrig
+    queryGen = queryGen:gsub("%(%s+", "(")
 
     local queries = parser.tostring(ast)
     local query = queries[1]
 
-    test:is(query, queryGen, "The generated query coincides with the sample")
+    return test:is(query, queryGen, "The generated query coincides with the sample")
 end
 
+
+local breakOnErr = false
+local n = #arg
+for i = 1, n do
+    local a = arg[i]
+    if a == "break" or a == "-x" then
+        breakOnErr = true
+        break
+    end
+end
 
 local queries = readFromFile("queries.yml")
 
@@ -55,7 +66,11 @@ test:plan(#queries)
 
 for _, row in ipairs(queries) do
     test:test(row[1], function(test)
-        testSql(test, row[2], row[3])
+        local passed = testSql(test, row[2], row[3])
+
+        if not passed and breakOnErr then
+            os.exit(1)
+        end
     end)
 end
 
