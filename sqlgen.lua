@@ -43,7 +43,13 @@ getExprStr = function(expr, nested, allowAlias)
     elseif exprType == "literalString" then
         str = "'" .. expr.value:gsub("'", "''") .. "'"
     elseif exprType == "literalInt" then
-        str = tostring(expr.value)
+        if not expr.isBoolLiteral then
+            str = tostring(expr.value)
+        else
+            str = tostring(expr.value ~= 0 and
+                expr.value ~= false and
+                expr.value ~= nil)
+        end
     elseif exprType == "literalNull" then
         str = "null"
     elseif exprType == "star" then

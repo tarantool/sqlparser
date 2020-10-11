@@ -133,12 +133,8 @@ getExpr = function(cdata, params)
     elseif exprType == "literalString" then
         expr.value = getStr(cdata.name)
     elseif exprType == "literalInt" then
-        local n = tonumber(cdata.ival)
-        if cdata.isBoolLiteral then
-            expr.value = (n ~= 0)
-        else
-            expr.value = n
-        end
+        expr.value = tonumber(cdata.ival)
+        expr.isBoolLiteral = (cdata.isBoolLiteral == true)
     elseif exprType == "literalNull" then
         expr.value = box.NULL
     elseif exprType == "parameter" then
