@@ -105,7 +105,7 @@ getExprStr = function(expr, nested, allowAlias)
                     tostring(expr.op))
             end
         elseif arity == 2 then
-            str = getExprStr(expr.expr) .. " " .. op .. " "
+            str = getExprStr(expr.expr, true) .. " " .. op .. " "
 
             if op == "in" then
                 if expr.exprList ~= nil then
