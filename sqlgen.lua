@@ -85,7 +85,12 @@ getExprStr = function(expr, nested, allowAlias)
             str = expr.name .. "(distinct " ..
                 getExprArrStr(expr.exprList) .. ")"
         else
-            str = expr.name .. "(" .. getExprArrStr(expr.exprList) .. ")"
+            local fnName = expr.name
+            if fnName:find("%.") then
+                fnName = '"' .. fnName .. '"'
+            end
+
+            str = fnName .. "(" .. getExprArrStr(expr.exprList) .. ")"
         end
     elseif exprType == "operator" then
         local op = expr.name
