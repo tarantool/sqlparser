@@ -3,7 +3,7 @@ package = "sqlparser"
 version = "scm-1"
 
 source = {
-    url = "git://github.com/tarantool/sqlparser.git",
+    url = "git+https://github.com/tarantool/sqlparser.git",
     branch = "master"
 }
 
