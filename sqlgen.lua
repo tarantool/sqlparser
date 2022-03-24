@@ -39,12 +39,12 @@ getExprStr = function(expr, nested, allowAlias)
     local str
 
     if exprType == "literalFloat" then
-        str = tostring(expr.value)
+        str = string.format("%f", expr.value)
     elseif exprType == "literalString" then
         str = "'" .. expr.value:gsub("'", "''") .. "'"
     elseif exprType == "literalInt" then
         if not expr.isBoolLiteral then
-            str = tostring(expr.value)
+            str = string.format("%d", expr.value)
         else
             str = tostring(expr.value ~= 0 and
                 expr.value ~= false and
