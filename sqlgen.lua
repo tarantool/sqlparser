@@ -1,5 +1,7 @@
 #!/usr/bin/env tarantool
 
+local fiber = require("fiber")
+
 local getExprStr
 local getExprArrStr
 local getJoinDefinitionStr
@@ -33,6 +35,8 @@ end
 
 getExprStr = function(expr, nested, allowAlias)
     assert(expr ~= nil, "sqlparser: expression is not specified")
+
+    fiber.yield()
 
     local exprType = expr.type
 
